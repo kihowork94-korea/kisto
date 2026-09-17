@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>KISTO (프로토타입 - 두뇌 테스트용)</title>
+<style>
+  body { font-family: sans-serif; max-width: 720px; margin: 40px auto; background: #f7f7fb; color: #1f2937; }
+  h2 { font-size: 18px; }
+  #board { background: white; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+  #board h3 { margin: 0 0 12px; font-size: 14px; color: #555; }
+
+  .quest { border-top: 1px solid #eee; padding: 14px 0 6px; }
+  .quest:first-of-type { border-top: none; }
+  .quest-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .quest-topic { font-weight: 600; font-size: 14px; }
+  .quest-pct { font-size: 12px; color: #7c3aed; font-weight: 700; }
+
+  .track { display: flex; align-items: flex-start; }
+  .node { flex: 1; text-align: center; position: relative; }
+  .node .dot {
+    width: 26px; height: 26px; border-radius: 50%; margin: 0 auto 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; border: 2px solid #e5e7eb;
+    background: #f3f4f6; color: #9ca3af;
+  }
+  .node.cleared .dot { background: #7c3aed; border-color: #7c3aed; color: white; }
+  .node.current .dot { background: #fff; border-color: #7c3aed; color: #7c3aed; box-shadow: 0 0 0 4px #ede9fe; }
+  .node .label { font-size: 11px; color: #9ca3af; }
+  .node.cleared .label { color: #4b5563; }
+  .node.current .label { color: #7c3aed; font-weight: 700; }
+  /* 노드 사이 연결선 */
+  .node:not(:first-child)::before {
+    content: ""; position: absolute; top: 13px; left: -50%; width: 100%;
+    height: 2px; background: #e5e7eb; z-index: 0;
+  }
+  .node.cleared::before { background: #7c3aed; }
+  .node .dot { position: relative; z-index: 1; }
+
+  .next-hint { margin-top: 10px; font-size: 12px; color: #6b7280; background: #f9fafb;
+               border-left: 3px solid #7c3aed; padding: 6px 10px; border-radius: 4px; }
+
+  #log { background: white; border-radius: 12px; padding: 16px; min-height: 320px; }
+  .msg { margin: 8px 0; padding: 10px 14px; border-radius: 10px; max-width: 80%; white-space: pre-wrap; }
+  .user { background: #dbeafe; margin-left: auto; }
+  .kisto { background: #ede9fe; }
+  #inputRow { display: flex; gap: 8px; margin-top: 12px; }
+  #msgInput { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #ccc; }
+  button { padding: 10px 16px; border-radius: 8px; border: none; background: #7c3aed; color: white; cursor: pointer; }
+</style>
+</head>
+<body>
+  <h2>키스토 — 캐릭터 UI는 나중에, 지금은 내부 로직 확인용</h2>
+
+  <div id="board">
+    <h3>내 연구 로드맵</h3>
+    <div id="quests">아직 시작한 연구 주제가 없습니다. 키스토에게 관심 분야를 말해보세요.</div>
+  </div>
+
+  <div id="log"></div>
+  <div id="inputRow">
+    <input id="msgInput" placeholder="키스토에게 말 걸어보기..." />
+    <button onclick="send()">보내기</button>
+  </div>
+
+<script>
+const sessionId = "demo-session";
+const API = "http://localhost:8420";
+const log = document.getElementById("log");
+
+function addMsg(text, cls) {
+  const div = document.createElement("div");
+  div.className = "msg " + cls;
+  div.textContent = text;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+async function send() {
+  const input = document.getElementById("msgInput");
+  const text = input.value.trim();
+  if (!text) return;
+  addMsg(text, "user");
+  input.value = "";
+
+  try {
+    const res = await fetch(API + "/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, message: text }),
+    });
+    const data = await res.json();
+    addMsg(data.reply + "\n\n[디버그: " + data.module + " / " + data.produced_by + "]", "kisto");
+    refreshBoard();
+  } catch (e) {
+    addMsg("백엔드 연결 실패: " + e.message + " (uvicorn 실행 중인지 확인)", "kisto");
+  }
+}
+
+function renderQuest(thread, stages) {
+  const p = thread.progress;
+  const nodes = stages.map((stage, i) => {
+    const cleared = p.cleared[i];
+    const isCurrent = !cleared && i === p.current_index;
+    const cls = cleared ? "node cleared" : (isCurrent ? "node current" : "node");
+    return `<div class="${cls}">
+              <div class="dot">${cleared ? "✓" : i + 1}</div>
+              <div class="label">${stage.label}</div>
+            </div>`;
+  }).join("");
+
+  const done = p.cleared_count === p.total;
+  const hint = done
+    ? "이 주제는 초안까지 완주했습니다."
+    : `다음 목표 — ${p.current_label}: ${p.current_hint}`;
+
+  return `<div class="quest">
+            <div class="quest-head">
+              <span class="quest-topic">${thread.topic}</span>
+              <span class="quest-pct">${p.cleared_count}/${p.total} · ${p.percent}%</span>
+            </div>
+            <div class="track">${nodes}</div>
+            <div class="next-hint">${hint}</div>
+          </div>`;
+}
+
+async function refreshBoard() {
+  try {
+    const res = await fetch(API + "/threads/" + sessionId);
+    const data = await res.json();
+    const box = document.getElementById("quests");
+    if (!data.threads.length) {
+      box.textContent = "아직 시작한 연구 주제가 없습니다. 키스토에게 관심 분야를 말해보세요.";
+      return;
+    }
+    box.innerHTML = data.threads.map(t => renderQuest(t, data.stages)).join("");
+  } catch (e) {
+    // 백엔드가 아직 안 떠 있으면 조용히 무시한다.
+  }
+}
+
+document.getElementById("msgInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") send();
+});
+
+refreshBoard();
+</script>
+</body>
+</html>
