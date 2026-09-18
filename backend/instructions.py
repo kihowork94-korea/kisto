@@ -12,8 +12,15 @@ def load_custom_instructions() -> str:
     return INSTRUCTIONS_PATH.read_text(encoding="utf-8").strip()
 
 
-def with_custom_instructions(base_system_prompt: str) -> str:
+def with_custom_instructions(base_system_prompt: str, role: str | None = None) -> str:
+    """KISTO.md(연구실 전체 지침) + 연구실 설정에서 이 역할에 준 지침을 붙인다."""
+    from lab import role_instructions  # lab → memory → ... 순환 import를 피하려고 여기서 불러온다
+
+    prompt = base_system_prompt
     custom = load_custom_instructions()
-    if not custom:
-        return base_system_prompt
-    return f"{base_system_prompt}\n\n[사용자 지정 지침 — KISTO.md]\n{custom}"
+    if custom:
+        prompt += f"\n\n[사용자 지정 지침 — KISTO.md]\n{custom}"
+    extra = role_instructions(role) if role else ""
+    if extra:
+        prompt += f"\n\n[연구 책임자가 이 역할에 준 지침]\n{extra}"
+    return prompt

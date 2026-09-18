@@ -7,6 +7,8 @@ from adapters.claude_adapter import ClaudeAdapter
 from adapters.claude_harness_adapter import ClaudeHarnessAdapter
 from adapters.openai_adapter import OpenAIAdapter
 from adapters.gemini_adapter import GeminiAdapter
+from lab import preferred_provider
+from tracing import TracingAdapter
 
 load_dotenv()
 
@@ -54,22 +56,40 @@ _FALLBACK_CHAIN = {
 VERIFIER_PREFERENCE = ["gemini", "openai", "claude", "claude_harness"]
 
 
+VENDOR = {"claude": "anthropic", "claude_harness": "anthropic", "openai": "openai", "gemini": "google"}
+
+
 def get_adapter(module_name: str, exclude: str | None = None):
+    # 연구실 설정에서 사용자가 이 역할에 모델을 지정했고 그 키가 있으면 그걸 먼저 쓴다.
+    chosen = preferred_provider(module_name)
+    if chosen in _adapters and chosen != exclude:
+        return TracingAdapter(_adapters[chosen])
     preferred = MODULE_MODEL_MAP.get(module_name, "claude")
     for candidate in _FALLBACK_CHAIN.get(preferred, [preferred]):
         if candidate in _adapters and candidate != exclude:
-            return _adapters[candidate]
+            return TracingAdapter(_adapters[candidate])
     for name, adapter in _adapters.items():
         if name != exclude:
-            return adapter
+            return TracingAdapter(adapter)
     raise RuntimeError("사용 가능한 어댑터가 없습니다 (exclude 조건 때문에 전부 제외됨).")
 
 
 def get_verifier_adapter(exclude: str):
+    """결과를 만든 provider와 '다른 회사' 모델을 고른다 (설계 결정 2).
+
+    사용자가 검토위원 모델을 지정했어도, 결과를 만든 쪽과 같은 회사면 따르지 않는다.
+    다른 회사 모델이 하나도 없을 때만 같은 회사 모델로 대신한다.
+    """
+    producer_vendor = VENDOR.get(exclude)
+    chosen = preferred_provider("verifier")
+    candidates = ([chosen] if chosen else []) + VERIFIER_PREFERENCE
+    for name in candidates:
+        if name in _adapters and VENDOR.get(name) != producer_vendor:
+            return TracingAdapter(_adapters[name])
     for name in VERIFIER_PREFERENCE:
         if name in _adapters and name != exclude:
-            return _adapters[name]
-    return next(iter(_adapters.values()))
+            return TracingAdapter(_adapters[name])
+    return TracingAdapter(next(iter(_adapters.values())))
 
 
 def available_providers() -> list[str]:

@@ -5,3 +5,7 @@ python-dotenv
 anthropic
 openai
 google-genai
+# 분석 샌드박스에서 생성 코드가 쓰는 라이브러리 (코드가 직접 설치하지 않도록 미리 넣는다)
+numpy
+scipy
+pandas

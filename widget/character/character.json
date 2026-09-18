@@ -1,0 +1,12 @@
+{
+  "name": "키스토",
+  "videos": {
+    "idle": "idle.mp4",
+    "thinking": null,
+    "talking": null,
+    "happy": null
+  },
+  "key": { "low": 0.05, "high": 0.15 },
+  "crop": { "top": 0, "bottom": 0.058 },
+  "displayWidth": 230
+}

@@ -4,7 +4,9 @@ import tempfile
 
 from .base import ModelAdapter
 
-TIMEOUT_SEC = 60
+# 하네스는 매 호출마다 CLI 프로세스를 새로 띄우기 때문에 API 호출보다 느리다.
+# 분석 결과처럼 긴 입력을 검증할 때 60초로는 모자란다.
+TIMEOUT_SEC = 180
 
 
 class ClaudeHarnessAdapter(ModelAdapter):
@@ -43,6 +45,10 @@ class ClaudeHarnessAdapter(ModelAdapter):
             cmd,
             capture_output=True,
             text=True,
+            # 한국어 Windows의 기본 인코딩(cp949)으로 읽으면 CLI의 UTF-8 출력이
+            # 깨져서 stdout이 통째로 None이 된다. 항상 UTF-8로 못박는다.
+            encoding="utf-8",
+            errors="replace",
             timeout=TIMEOUT_SEC,
             # 현재 프로젝트의 CLAUDE.md 등을 자동으로 끌어오지 않도록
             # 무관한 임시 디렉터리에서 실행한다.
@@ -50,7 +56,7 @@ class ClaudeHarnessAdapter(ModelAdapter):
         )
 
         try:
-            data = json.loads(result.stdout)
+            data = json.loads(result.stdout or "")
         except json.JSONDecodeError as exc:
             raise RuntimeError(
                 f"claude CLI 출력 파싱 실패: {result.stdout or result.stderr}"

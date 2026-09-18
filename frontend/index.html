@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<title>KISTO (프로토타입 - 두뇌 테스트용)</title>
+<title>KISTO — 백엔드 테스트 페이지</title>
 <style>
   body { font-family: sans-serif; max-width: 720px; margin: 40px auto; background: #f7f7fb; color: #1f2937; }
   h2 { font-size: 18px; }
@@ -49,7 +49,7 @@
 </style>
 </head>
 <body>
-  <h2>키스토 — 캐릭터 UI는 나중에, 지금은 내부 로직 확인용</h2>
+  <h2>키스토 — 백엔드 테스트 페이지 (실사용은 widget/의 캐릭터 위젯)</h2>
 
   <div id="board">
     <h3>내 연구 로드맵</h3>
@@ -65,6 +65,7 @@
 <script>
 const sessionId = "demo-session";
 const API = "http://localhost:8420";
+const DEBUG = new URLSearchParams(location.search).get("debug") === "1";
 const log = document.getElementById("log");
 
 function addMsg(text, cls) {
@@ -89,7 +90,11 @@ async function send() {
       body: JSON.stringify({ session_id: sessionId, message: text }),
     });
     const data = await res.json();
-    addMsg(data.reply + "\n\n[디버그: " + data.module + " / " + data.produced_by + "]", "kisto");
+    // 내부 구조는 사용자에게 보이면 안 된다 (설계 결정 4). ?debug=1 일 때만 표시.
+    const debug = DEBUG
+      ? `\n\n[디버그: ${data.module} / 생성 ${data.produced_by} / 검증 ${data.verified_by}]`
+      : "";
+    addMsg(data.reply + debug, "kisto");
     refreshBoard();
   } catch (e) {
     addMsg("백엔드 연결 실패: " + e.message + " (uvicorn 실행 중인지 확인)", "kisto");

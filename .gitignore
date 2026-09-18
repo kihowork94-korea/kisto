@@ -3,3 +3,9 @@ __pycache__/
 *.pyc
 data/memory_store.json
 .venv/
+data/e2e_result.json
+node_modules/
+data/backend.log*
+data/uploads/
+data/lab_settings.json
+data/.kisto_token

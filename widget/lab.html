@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta
+  http-equiv="Content-Security-Policy"
+  content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src http://127.0.0.1:8420 http://localhost:8420"
+/>
+<title>키스토 연구실</title>
+<link rel="stylesheet" href="lab.css" />
+</head>
+<body>
+  <header id="topbar">
+    <div class="brand">🧑‍🔬 <b>키스토 연구실</b></div>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="lab" role="tab">🏠 연구실</button>
+      <button class="tab" data-tab="dashboard" role="tab">📊 대시보드</button>
+    </nav>
+    <label class="project-pick">
+      진행 중인 프로젝트
+      <select id="project"></select>
+    </label>
+    <div id="level" class="level"></div>
+  </header>
+
+  <main>
+    <section id="scene-wrap">
+      <!-- 연구실. .spot을 누르면 그 자리 연구원의 일(오른쪽 서랍)이 열린다. -->
+      <svg id="scene" viewBox="0 0 960 540" role="img" aria-label="키스토 연구실">
+        <!-- 배경(벽·바닥·장식). lab-assets/lab.json에 background 이미지를 지정하면 이 그룹 대신 이미지를 쓴다 -->
+        <g id="room-art">
+        <rect x="0" y="0" width="960" height="400" fill="#f3ead9" />
+        <rect x="0" y="330" width="960" height="70" fill="#eadcc4" />
+        <rect x="0" y="326" width="960" height="6" fill="#d9c4a3" />
+        <rect x="0" y="400" width="960" height="140" fill="#d2b48c" />
+        <g stroke="#c29f73" stroke-width="2">
+          <line x1="0" y1="440" x2="960" y2="440" />
+          <line x1="0" y1="490" x2="960" y2="490" />
+          <line x1="140" y1="400" x2="120" y2="440" /><line x1="420" y1="440" x2="400" y2="490" />
+          <line x1="700" y1="400" x2="690" y2="440" /><line x1="860" y1="440" x2="850" y2="490" />
+          <line x1="260" y1="490" x2="250" y2="540" /><line x1="620" y1="490" x2="610" y2="540" />
+        </g>
+        <ellipse cx="360" cy="440" rx="150" ry="26" fill="#b98d64" opacity="0.55" />
+
+        <!-- 벽시계 (장식) -->
+        <g transform="translate(745 85)">
+          <circle r="26" fill="#fff" stroke="#8b5e3c" stroke-width="5" />
+          <line x1="0" y1="0" x2="0" y2="-15" stroke="#374151" stroke-width="3" stroke-linecap="round" />
+          <line x1="0" y1="0" x2="11" y2="4" stroke="#374151" stroke-width="3" stroke-linecap="round" />
+        </g>
+
+        <!-- 화분 (장식) -->
+        <g transform="translate(750 360)">
+          <path d="M-14 0 h28 l-4 38 h-20 z" fill="#c2410c" />
+          <path d="M0 0 q-24 -30 -6 -52 q4 22 6 52 q2 -30 16 -46 q6 26 -16 46" fill="#16a34a" />
+        </g>
+        </g>
+        <g id="room-image"></g>
+
+        <!-- 📚 서재 — 문헌 연구원 -->
+        <g class="spot" data-view="library" tabindex="0">
+          <rect x="30" y="110" width="180" height="290" rx="6" fill="#8b5e3c" />
+          <rect x="40" y="120" width="160" height="270" fill="#6d4529" />
+          <rect x="40" y="185" width="160" height="8" fill="#8b5e3c" />
+          <rect x="40" y="255" width="160" height="8" fill="#8b5e3c" />
+          <rect x="40" y="325" width="160" height="8" fill="#8b5e3c" />
+          <g id="books"></g>
+          <g class="tag" transform="translate(120 420)"><rect x="-44" y="-15" width="88" height="26" rx="13" /><text>📚 서재</text></g>
+          <g class="badge" id="badge-library" transform="translate(205 112)"><circle r="14" /><text>0</text></g>
+          <g class="quest" id="quest-library" transform="translate(120 88)"><circle r="17" /><text>!</text></g>
+        </g>
+
+        <!-- 📋 퀘스트 보드 — 프로젝트 진행도 -->
+        <g class="spot" data-view="board" tabindex="0">
+          <rect x="250" y="45" width="230" height="150" rx="6" fill="#fff" stroke="#9ca3af" stroke-width="6" />
+          <text x="365" y="72" class="board-title">퀘스트 보드</text>
+          <g id="board-cards"></g>
+          <rect x="300" y="195" width="130" height="7" rx="3" fill="#9ca3af" />
+          <g class="tag" transform="translate(365 222)"><rect x="-56" y="-15" width="112" height="26" rx="13" /><text>📋 퀘스트 보드</text></g>
+          <g class="quest trophy" id="quest-board" transform="translate(470 40)"><circle r="17" /><text>🏆</text></g>
+        </g>
+
+        <!-- 💻 책상과 노트북 — 집필 연구원 -->
+        <g class="spot" data-view="laptop" tabindex="0">
+          <rect x="250" y="320" width="220" height="14" rx="3" fill="#a0714a" />
+          <rect x="262" y="334" width="12" height="70" fill="#8b5e3c" />
+          <rect x="446" y="334" width="12" height="70" fill="#8b5e3c" />
+          <rect x="385" y="334" width="60" height="40" fill="#b07f55" />
+          <circle cx="415" cy="354" r="3" fill="#6d4529" />
+          <rect x="310" y="252" width="100" height="64" rx="5" fill="#374151" />
+          <rect id="laptop-screen" x="316" y="258" width="88" height="52" rx="2" fill="#475569" />
+          <g id="laptop-lines" opacity="0">
+            <rect x="324" y="268" width="60" height="4" rx="2" fill="#fff" />
+            <rect x="324" y="278" width="72" height="4" rx="2" fill="#fff" />
+            <rect x="324" y="288" width="52" height="4" rx="2" fill="#fff" />
+            <rect x="324" y="298" width="66" height="4" rx="2" fill="#fff" />
+          </g>
+          <polygon points="300,322 420,322 410,316 310,316" fill="#6b7280" />
+          <rect x="430" y="298" width="18" height="20" rx="3" fill="#f9fafb" stroke="#9ca3af" />
+          <path d="M448 303 q8 5 0 10" fill="none" stroke="#9ca3af" stroke-width="2" />
+          <g class="tag" transform="translate(360 428)"><rect x="-50" y="-15" width="100" height="26" rx="13" /><text>💻 노트북</text></g>
+          <g class="badge" id="badge-laptop" transform="translate(412 250)"><circle r="14" /><text>0</text></g>
+          <g class="quest" id="quest-laptop" transform="translate(360 228)"><circle r="17" /><text>!</text></g>
+        </g>
+
+        <!-- 🔍 검토 보드 — 외부 검토위원 -->
+        <g class="spot" data-view="review" tabindex="0">
+          <rect x="520" y="55" width="190" height="135" rx="6" fill="#d6a86c" stroke="#8b5e3c" stroke-width="6" />
+          <g id="review-notes"></g>
+          <g transform="translate(688 170)">
+            <circle r="13" fill="none" stroke="#374151" stroke-width="5" />
+            <line x1="9" y1="9" x2="20" y2="20" stroke="#374151" stroke-width="6" stroke-linecap="round" />
+          </g>
+          <g class="tag" transform="translate(615 218)"><rect x="-50" y="-15" width="100" height="26" rx="13" /><text>🔍 검토 보드</text></g>
+          <g class="badge" id="badge-review" transform="translate(708 58)"><circle r="14" /><text>0</text></g>
+          <g class="quest" id="quest-review" transform="translate(615 35)"><circle r="17" /><text>!</text></g>
+        </g>
+
+        <!-- 🧪 실험대 — 분석 연구원 -->
+        <g class="spot" data-view="bench" tabindex="0">
+          <rect x="500" y="310" width="230" height="14" rx="2" fill="#9ca3af" />
+          <rect x="505" y="324" width="220" height="76" fill="#e5e7eb" stroke="#cbd5e1" />
+          <line x1="615" y1="324" x2="615" y2="400" stroke="#cbd5e1" />
+          <circle cx="605" cy="362" r="3" fill="#94a3b8" /><circle cx="625" cy="362" r="3" fill="#94a3b8" />
+          <rect x="520" y="298" width="96" height="10" rx="2" fill="#a0714a" />
+          <g id="tubes"></g>
+          <path d="M640 250 h14 v20 l22 36 q3 6 -4 6 h-50 q-7 0 -4 -6 l22 -36 z" fill="#ecfeff" stroke="#94a3b8" stroke-width="2" />
+          <path id="flask-liquid" d="M630 290 h46 l10 14 q2 4 -3 4 h-60 q-5 0 -3 -4 z" fill="#86efac" />
+          <circle class="bubble" cx="650" cy="288" r="3" fill="#bbf7d0" />
+          <circle class="bubble b2" cx="662" cy="292" r="2" fill="#bbf7d0" />
+          <g fill="#475569">
+            <rect x="690" y="296" width="30" height="10" rx="2" />
+            <rect x="700" y="262" width="8" height="36" />
+            <rect x="694" y="252" width="22" height="14" rx="3" transform="rotate(-20 705 259)" />
+          </g>
+          <g class="tag" transform="translate(615 428)"><rect x="-50" y="-15" width="100" height="26" rx="13" /><text>🧪 실험대</text></g>
+          <g class="badge" id="badge-bench" transform="translate(726 300)"><circle r="14" /><text>0</text></g>
+          <g class="quest" id="quest-bench" transform="translate(568 250)"><circle r="17" /><text>!</text></g>
+        </g>
+
+        <!-- 🚪 연구원 명단 — 역할 부여 -->
+        <g class="spot" data-view="team" tabindex="0">
+          <rect x="780" y="150" width="130" height="250" rx="5" fill="#8b5e3c" />
+          <rect x="795" y="215" width="100" height="70" rx="4" fill="#7a5132" />
+          <rect x="795" y="300" width="100" height="80" rx="4" fill="#7a5132" />
+          <circle cx="890" cy="290" r="6" fill="#fbbf24" />
+          <rect x="800" y="168" width="90" height="38" rx="4" fill="#fef3c7" stroke="#d6a86c" stroke-width="2" />
+          <text x="845" y="184" class="plate">연구원</text>
+          <text x="845" y="200" class="plate">명단</text>
+          <g class="tag" transform="translate(845 428)"><rect x="-60" y="-15" width="120" height="26" rx="13" /><text>🚪 연구원 명단</text></g>
+        </g>
+
+      </svg>
+
+      <!-- 매니저 키스토의 안내 말풍선 -->
+      <div id="guide">
+        <img src="character/icon.png" alt="" />
+        <div class="bubble-text" id="guide-text">연구실을 불러오는 중이에요…</div>
+      </div>
+    </section>
+
+    <!-- 오른쪽 서랍: 누른 자리 연구원의 일 -->
+    <aside id="drawer"></aside>
+  </main>
+
+  <!-- 대시보드: 연구실 전체(모든 프로젝트)의 진행을 한 화면에 -->
+  <section id="dashboard" class="viz-root" hidden></section>
+  <div id="tooltip" role="tooltip" hidden></div>
+
+  <script src="node_modules/marked/lib/marked.umd.js"></script>
+  <script src="node_modules/dompurify/dist/purify.min.js"></script>
+  <script src="lab.js"></script>
+</body>
+</html>

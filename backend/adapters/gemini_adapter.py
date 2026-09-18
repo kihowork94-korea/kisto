@@ -1,6 +1,7 @@
 import os
 
 from google import genai
+from google.genai import types
 
 from .base import ModelAdapter
 
@@ -10,14 +11,21 @@ class GeminiAdapter(ModelAdapter):
 
     name = "gemini"
 
-    def __init__(self, model: str = "gemini-2.5-pro"):
+    def __init__(self, model: str | None = None):
         self.client = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
-        self.model = model
+        self.model = model or os.environ.get("GEMINI_MODEL") or "gemini-2.5-pro"
 
     def generate(self, system_prompt: str, messages: list[dict]) -> str:
-        history = "\n\n".join(f"[{m['role']}] {m['content']}" for m in messages)
+        contents = [
+            types.Content(
+                role="model" if m["role"] == "assistant" else "user",
+                parts=[types.Part(text=m["content"])],
+            )
+            for m in messages
+        ]
         response = self.client.models.generate_content(
             model=self.model,
-            contents=f"{system_prompt}\n\n{history}",
+            contents=contents,
+            config=types.GenerateContentConfig(system_instruction=system_prompt),
         )
-        return response.text
+        return response.text or ""

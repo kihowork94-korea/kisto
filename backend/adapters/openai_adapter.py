@@ -10,13 +10,15 @@ class OpenAIAdapter(ModelAdapter):
 
     name = "openai"
 
-    def __init__(self, model: str = "gpt-5.1-codex"):
+    def __init__(self, model: str | None = None):
         self.client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-        self.model = model
+        self.model = model or os.environ.get("OPENAI_MODEL") or "gpt-5.1-codex"
 
     def generate(self, system_prompt: str, messages: list[dict]) -> str:
-        response = self.client.chat.completions.create(
+        # codex 계열은 Chat Completions가 아니라 Responses API로만 호출된다.
+        response = self.client.responses.create(
             model=self.model,
-            messages=[{"role": "system", "content": system_prompt}, *messages],
+            instructions=system_prompt,
+            input=messages,
         )
-        return response.choices[0].message.content
+        return response.output_text

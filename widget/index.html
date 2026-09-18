@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta
+  http-equiv="Content-Security-Policy"
+  content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; connect-src http://127.0.0.1:8420 http://localhost:8420"
+/>
+<title>키스토</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 대화창: 캐릭터를 클릭하면 열린다. .solid 요소 위에서는 클릭이 통과하지 않는다. -->
+  <!-- 캐릭터 위 버튼 막대: 무엇을 누르면 되는지 항상 보이게 한다 -->
+  <nav id="dock" class="solid" aria-label="키스토 메뉴">
+    <button id="dock-chat" title="키스토와 대화하기">💬</button>
+    <button id="dock-lab" title="연구실 열기">🏠</button>
+    <button id="dock-hide" title="숨기기 (트레이 아이콘이나 Ctrl+Shift+K로 다시 보기)">➖</button>
+    <button id="dock-quit" title="키스토 종료">✕</button>
+  </nav>
+
+  <section id="panel" class="solid" hidden>
+    <button id="panel-close" title="대화창 닫기 (Esc)" aria-label="대화창 닫기">✕</button>
+    <header id="roadmap">
+      <div id="roadmap-empty">아직 시작한 연구 주제가 없어요. 관심 분야를 말해 주세요.</div>
+    </header>
+
+    <div id="log"></div>
+
+    <form id="composer">
+      <button id="attach" type="button" title="데이터 파일 첨부 (CSV/TSV/TXT)" aria-label="파일 첨부">📎</button>
+      <textarea id="input" rows="2" placeholder="키스토에게 말 걸기… (Enter 전송, Shift+Enter 줄바꿈)"></textarea>
+      <button id="send" type="submit" aria-label="보내기">↑</button>
+      <input id="file" type="file" accept=".csv,.tsv,.txt" hidden />
+    </form>
+  </section>
+
+  <!-- 캐릭터 머리 위 생각/알림 말풍선 -->
+  <div id="thought" class="solid" hidden>
+    <span id="thought-text"></span><span class="dots"><i></i><i></i><i></i></span>
+    <span id="thought-timer"></span>
+  </div>
+
+  <div id="toast" hidden></div>
+  <div id="sparkles"></div>
+
+  <div id="character-wrap">
+    <canvas id="character"></canvas>
+  </div>
+  <video id="source" muted loop playsinline autoplay></video>
+
+  <script src="node_modules/marked/lib/marked.umd.js"></script>
+  <script src="node_modules/dompurify/dist/purify.min.js"></script>
+  <script src="chroma.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>
