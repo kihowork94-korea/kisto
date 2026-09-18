@@ -330,6 +330,13 @@ $("dock-quit").addEventListener("click", () => {
   if (confirm("키스토를 종료할까요? (대화 기록은 그대로 남아요)")) window.kisto.quit();
 });
 $("panel-close").addEventListener("click", () => (panel.hidden = true));
+// 초기화(설정·대화 기록 복원)가 끝나기 전에 신호가 오면 끝난 뒤에 연다.
+let ready = false;
+let openChatWhenReady = false;
+window.kisto.onOpenChat(() => {
+  if (ready) panel.hidden && openPanel();
+  else openChatWhenReady = true;
+});
 
 // ── 연구 로드맵 (저장된 실데이터 기준, 서버가 판정) ──
 function renderRoadmap(stages, threads) {
@@ -527,6 +534,8 @@ window.kisto.onNewSession(() => {
   setVideo("idle");
 
   for (const m of history) addMessage(m.role, m.text, { ...m, persist: false });
+  ready = true;
+  if (openChatWhenReady) openPanel();
 
   try {
     await apiFetch("/health");

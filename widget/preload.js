@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld("kisto", {
   dragMove: () => ipcRenderer.send("kisto:drag-move"),
   dragEnd: () => ipcRenderer.send("kisto:drag-end"),
   onNewSession: (callback) => ipcRenderer.on("kisto:new-session", () => callback()),
+  onOpenChat: (callback) => ipcRenderer.on("kisto:open-chat", () => callback()),
   onPresenter: (callback) => ipcRenderer.on("kisto:presenter", (_e, value) => callback(value)),
   syncPresenter: (value) => ipcRenderer.send("kisto:presenter-state", value),
   saveNote: (note) => ipcRenderer.invoke("kisto:save-note", note),

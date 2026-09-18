@@ -9,3 +9,4 @@ data/backend.log*
 data/uploads/
 data/lab_settings.json
 data/.kisto_token
+data/snapshots/

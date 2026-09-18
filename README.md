@@ -78,7 +78,8 @@ python -m http.server 8500
 
 ## 바탕화면 캐릭터 위젯 (`widget/`)
 
-**`run.cmd` 더블클릭** 한 번이면 백엔드(창 없이)와 위젯이 같이 뜬다 (`run.cmd -Lab`이면 연구실 창도 같이 연다). `claude` CLI가
+**`run.cmd` 더블클릭** 한 번이면 백엔드(창 없이)와 위젯이 같이 뜬다 (`-Lab`: 연구실 창도 열기, `-Chat`: 대화창을
+펼친 채 시작). 바탕화면의 **키스토** 바로가기는 `run.cmd -Chat -Lab`을 실행한다. `claude` CLI가
 PATH에 없어도 Claude 데스크톱 앱에 번들된 것을 찾아 쓴다.
 
 - 투명·항상 위 창에 캐릭터만 떠 있고, 캐릭터가 없는 투명한 곳은 클릭이 바탕화면으로 통과한다
@@ -181,3 +182,13 @@ PATH에 없어도 Claude 데스크톱 앱에 번들된 것을 찾아 쓴다.
 - 캐릭터 영상은 지금 대기(idle) 하나뿐이라 생각 중/축하 상태는 효과로 표현한다.
   상태별 영상을 추가하면 `character.json`만 고치면 된다.
 - KIST-PaperBanana 등 사내 시스템 연동은 로드맵으로 남긴다.
+
+## 제출용 신청서 (hwpx)
+
+`python scripts/build_application_hwpx.py --template <서식 hwpx>`로 `docs/KISTO_AIX_신청서.hwpx`를 만든다.
+목차는 공모전 신청서 항목을 따르고, 글꼴·제목 상자·개조식·표 모양은 `--template`으로 준 한글 파일의
+스타일을 빌려 쓴다 (템플릿의 본문·그림·메타데이터는 가져오지 않는다). 붉은 `[ ]`는 제출 전에 채울 칸이고,
+내용은 스크립트 위쪽의 `GENERAL`/`SUMMARY`/`BODY`를 고친 뒤 다시 실행하면 된다. 그림은 `docs/images/`.
+만든 파일이 한글에서 실제로 열리는지는 `scripts/check_hwpx.ps1 <파일>`로 확인한다 (한글 COM으로 열어 PDF 저장).
+
+연구실·대시보드 화면은 `scripts/ui_snapshot.js <세션ID>`로 캡처한다 (`widget`에서 Electron으로 실행, `data/snapshots/`).

@@ -59,6 +59,10 @@ function createWindow() {
   // 기본은 클릭 통과. 캐릭터나 대화창 위에 마우스가 올라오면 렌더러가 해제한다.
   win.setIgnoreMouseEvents(true, { forward: true });
   win.loadFile("index.html");
+  // run.cmd -Chat (바탕화면 바로가기)으로 실행하면 대화창을 펼친 채로 시작한다.
+  if (process.argv.includes("--chat")) {
+    win.webContents.once("did-finish-load", () => win.webContents.send("kisto:open-chat"));
+  }
 
   // 답변 속 링크는 위젯 안에서 열지 않고 기본 브라우저로 넘긴다.
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -232,6 +236,7 @@ if (!app.requestSingleInstanceLock()) {
 } else {
   app.on("second-instance", (_event, argv) => {
     if (win) win.showInactive();
+    if (argv.includes("--chat") && win) win.webContents.send("kisto:open-chat");
     if (argv.includes("--lab")) openLab();
   });
   app.whenReady().then(() => {

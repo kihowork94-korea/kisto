@@ -1,7 +1,8 @@
 ﻿# 키스토 백엔드 + 바탕화면 위젯을 한 번에 띄운다. (run.cmd 더블클릭으로도 실행 가능)
 #   -BackendOnly : 위젯 없이 백엔드만 띄운다
 #   -Lab         : 위젯과 함께 연구실 창도 바로 연다
-param([switch]$BackendOnly, [switch]$Lab)
+#   -Chat        : 위젯의 대화창을 펼친 채로 시작한다 (바탕화면 바로가기는 -Chat -Lab)
+param([switch]$BackendOnly, [switch]$Lab, [switch]$Chat)
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
 $api = "http://127.0.0.1:8420"
@@ -58,5 +59,6 @@ if (-not (Test-Path "$widget\node_modules\electron")) {
 }
 $electronArgs = @("`"$widget`"")
 if ($Lab) { $electronArgs += "--lab" }
+if ($Chat) { $electronArgs += "--chat" }
 Start-Process -FilePath "$widget\node_modules\electron\dist\electron.exe" -ArgumentList $electronArgs -WorkingDirectory $widget
 Write-Host "위젯 실행 — 트레이 아이콘 또는 Ctrl+Shift+K로 보이기/숨기기, 🏠 버튼으로 연구실"
