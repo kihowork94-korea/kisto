@@ -1,0 +1,44 @@
+# 01 — room.png  (배경, lab.json의 "background")
+# 크기: 1920 x 1080 px (960x540 캔버스의 2배). 16:9 정확히.
+# 투명 배경: 아니오 — 꽉 찬 불투명 그림 한 장.
+# 중요: 가구는 그리지 않는다. 책장·화이트보드·책상·검토보드·실험대·문은 전부 따로 올라간다.
+
+[STYLE]
+2D game asset, cozy research-lab interior, hand-painted flat vector illustration with
+soft cel shading and a subtle paper grain. Clean dark-brown outlines (#5b4027), rounded
+corners, slightly chunky friendly proportions, anime-adjacent children's-book warmth.
+Straight-on front elevation with a slight (about 10 degrees) top-down tilt — no vanishing
+point, no isometric skew, no camera rotation. One soft light source from the upper left;
+short warm shadows falling to the lower right. Muted warm palette only: cream wall
+#f3ead9, wainscot #eadcc4, sandy wood floor #d2b48c, walnut #8b5e3c, deep walnut #6d4529,
+paper #fffdf8, violet accent #7c3aed, mint accent #1baf7a, charcoal #1f2937. Must stay
+readable when shrunk to 25%. No text, no letters, no numbers, no logos, no watermark,
+no signature, no UI frames, no people.
+
+[SUBJECT]
+An EMPTY cozy research-lab room seen straight on, like a stage set waiting for its
+furniture. Three horizontal bands across the full width:
+  - top 61% of the height: cream plaster wall (#f3ead9) with a faint vertical paper grain,
+  - a wainscot band (#eadcc4) with a thin darker trim line (#d9c4a3) at its top edge,
+  - bottom 26%: sandy wooden plank floor (#d2b48c) with soft plank seams receding gently.
+Decoration ONLY in the gaps listed below: a round wall clock with a walnut rim, one small
+potted plant in a terracotta pot on the floor, a woven round rug on the floor, a thin
+framed blank picture, a power outlet and a trailing cable, a few faint scuff marks.
+Warm afternoon light pools on the floor from the upper left.
+
+[KEEP CLEAR]  (960x540 기준 좌표 / 1920x1080 출력에서는 전부 2배)
+Leave these rectangles free of any object — furniture will be composited on top:
+  x 30  y 110  w 180  h 290   (bookshelf)
+  x 250 y 45   w 230 h 160    (whiteboard)
+  x 250 y 250  w 220 h 155    (desk + laptop)
+  x 520 y 55   w 190 h 135    (cork board)
+  x 500 y 250  w 230 h 150    (lab bench)
+  x 780 y 150  w 130 h 250    (door)
+Usable decoration gaps: the wall strip around x 215-245 and x 715-775, the floor strip
+below y 405, and the top strip above y 45. The floor line (wall meets floor) must sit at
+y = 400 of 540 (= y 800 of 1080) so the furniture stands on it correctly.
+
+[NEGATIVE]
+furniture, bookshelf, desk, table, laptop, whiteboard, cork board, lab bench, door,
+chairs, people, text, letters, numbers, watermark, signature, logo, UI, photorealistic,
+3D render, strong perspective, fisheye, dark or moody lighting, clutter in the center

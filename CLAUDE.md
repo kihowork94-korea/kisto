@@ -136,6 +136,12 @@
 
 아직 안 한 것:
 - 연구실 이미지 에셋 적용 (사용자가 제작 중). 받으면 `lab-assets/lab.json`에 등록하고 위치만 맞춘다.
+  생성용 프롬프트는 `widget/lab-assets/prompts/`에 종류별로 준비해 뒀다 (2026-09-21).
+  폴더를 통째로 생성 AI에 주면 한 장만 만들고 끝나서, **파일 하나 = 이미지 한 장**인
+  복붙용 `prompts/plain/`과 지시문 `prompts/HOW_TO_ORDER.md`를 따로 뒀다.
+  받은 그림은 `scripts/prep_lab_assets.py`(흰 배경 제거·여백 자르기·규격 크기)로 다듬고
+  `scripts/check_lab_assets.py`(크기·비율·투명도 점검)로 확인한다. 둘 다 실제로 돌려 봤다.
+  선택 항목인 UI 아이콘·연구원 초상까지 넣어 주면 그때 코드에 붙인다.
 - 교차검증을 **실제 이종 모델로** 돌려본 적은 아직 없다. 지금은 provider가
   `claude_harness` 하나뿐이라 Claude가 Claude를 검증하는 상태다.
   데모·발표 전에 OpenAI 또는 Gemini 키를 넣고 `scripts/e2e.py`의 "이종검증" 열이 O인지

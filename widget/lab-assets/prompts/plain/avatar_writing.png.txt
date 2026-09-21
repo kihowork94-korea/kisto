@@ -1,0 +1,14 @@
+Anime-style character portrait bust, head and shoulders, facing the viewer, soft cel
+shading with clean line art, warm cozy research-lab mood, muted palette (cream #f3ead9,
+walnut #8b5e3c, violet #7c3aed, mint #1baf7a, charcoal #1f2937). Friendly and calm
+expression, simple shapes that stay readable at 48 px. Fully transparent background, no
+frame, no circle border, no text. Consistent lighting from the upper left across all five
+portraits, identical rendering style and identical head size so they line up as a set.
+
+A thoughtful researcher with wavy shoulder-length hair, cream cardigan under an open lab
+coat, a fountain pen held near the chin as if mid-sentence, a small notebook at the
+shoulder.
+
+Output: exactly 512 x 512 pixels, PNG with a fully transparent background (alpha channel).
+
+Avoid: text, letters, numbers, watermark, signature, logo, frame, circle border, background, opaque background, white background, full body, hands covering face, photorealistic, 3D render, sexualized, extra fingers, distorted face, heavy shading, dark mood

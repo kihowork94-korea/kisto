@@ -1,0 +1,24 @@
+2D game asset, cozy research-lab interior, hand-painted flat vector illustration with
+soft cel shading and a subtle paper grain. Clean dark-brown outlines (#5b4027), rounded
+corners, slightly chunky friendly proportions, anime-adjacent children's-book warmth.
+Straight-on front elevation with a slight (about 10 degrees) top-down tilt - no vanishing
+point, no isometric skew, no camera rotation. One soft light source from the upper left;
+short warm shadows falling to the lower right. Muted warm palette only: cream wall
+paper #fffdf8, violet accent #7c3aed, mint accent #1baf7a, charcoal #1f2937. Must stay
+readable when shrunk to 25%. No text, no letters, no numbers, no logos, no watermark,
+no signature, no UI frames, no people.
+
+Single object, cut out on a fully transparent background (alpha PNG). No ground plane, no
+wall behind it, no scene - only the object and its own soft contact shadow, which must be
+semi-transparent so it blends onto the room floor. Trim tight: the object touches all four
+edges with at most 2% margin.
+
+A cork pin board in a thin walnut frame (#8b5e3c), hanging flat on a wall, seen straight
+on. The cork surface (#d2b48c with fine speckles) is EMPTY except for four push pins
+parked in the corners and one magnifying glass with a walnut handle hooked on the lower
+edge of the frame. Calm and unused. Soft semi-transparent shadow hugging the frame edge
+only - no floor shadow.
+
+Output: exactly 380 x 270 pixels, PNG with a fully transparent background (alpha channel).
+
+Avoid: text, letters, numbers, watermark, signature, logo, UI, buttons, people, hands, faces, photorealistic, 3D render, glossy plastic, neon, harsh contrast, white background, opaque background, background scene, wall, floor, room, cropped object, multiple objects, perspective distortion, strong drop shadow

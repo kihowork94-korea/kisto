@@ -75,6 +75,8 @@ widget/
   index.html renderer.js style.css chroma.js   투명 캐릭터 위젯 + 대화창 (WebGL 크로마키)
   lab.html lab.js lab.css   연구실 창(장면 + 서랍) + 📊 대시보드 탭
   lab-assets/        연구실 이미지 에셋 자리 (lab.json + 규격 README). 지금은 벡터 그림
+    prompts/         에셋 생성 프롬프트 (00 스타일 → 01 배경 → 02~12 가구, 13~14 선택)
+      plain/         한 파일 = 이미지 한 장, 복붙용 (도구 지시문은 HOW_TO_ORDER.md)
   character/         idle.mp4(캐릭터 영상, 워터마크는 crop으로 가림), icon.png/ico, character.json
 scripts/
   e2e.py             데모 시나리오 4단계를 실제 LLM으로 돌려 점검 (data/e2e_result.json)
@@ -136,7 +138,9 @@ run.cmd / run.ps1    실행기 (-BackendOnly / -Lab / -Chat)
    `build_application_hwpx.py`의 `GENERAL`/`BODY`를 고치고 `--template <사업계획서 hwpx>`로 재생성 →
    `scripts/check_hwpx.ps1`로 열리는지 확인. 원본 **공모전 신청서 양식 파일은 아직 못 받음** — 받으면 목차 맞추기
 3. **시연영상** — 대본 `docs/demo_scenario.md` (API 키 넣은 뒤, 발표 모드 켜고, 가상 데이터 명시)
-4. **연구실 이미지 에셋** — 사용자가 제작 중. 받으면 `widget/lab-assets/`에 넣고 `lab.json`만 수정 (규격은 그 폴더 README)
+4. **연구실 이미지 에셋** — 사용자가 제작 중. 받으면 `widget/lab-assets/`에 넣고 `lab.json`만 수정 (규격은 그 폴더 README).
+   생성 프롬프트는 `widget/lab-assets/prompts/` (시키는 법은 `prompts/HOW_TO_ORDER.md`).
+   받은 그림은 `scripts\prep_lab_assets.py`로 다듬고 `scripts\check_lab_assets.py`로 점검한다 (pillow 필요)
 5. **GitHub 공개 여부 결정** — 신청서 첨부용. 공개 전 `docs/KISTO_AIX_신청서.hwpx`·스크린샷 포함 여부 확인
 6. 발표자료 (10-28용, 1단계 결과 뒤)
 

@@ -1,0 +1,20 @@
+2D game asset, cozy research-lab interior, hand-painted flat vector illustration with
+soft cel shading and a subtle paper grain. Clean dark-brown outlines (#5b4027), rounded
+corners, slightly chunky friendly proportions, anime-adjacent children's-book warmth.
+Straight-on front elevation with a slight (about 10 degrees) top-down tilt — no vanishing
+point, no isometric skew, no camera rotation. One soft light source from the upper left;
+short warm shadows falling to the lower right. Muted warm palette only: cream wall
+paper #fffdf8, violet accent #7c3aed, mint accent #1baf7a, charcoal #1f2937. Must stay
+readable when shrunk to 25%. No text, no letters, no numbers, no logos, no watermark,
+no signature, no UI frames, no people.
+
+Subject: a style reference sheet for a cozy research-lab game. On a plain white
+background, arranged in a loose grid with generous spacing: a walnut bookshelf, a small
+white whiteboard, an open laptop on a desk, a cork pin board, a lab bench with a test
+tube rack and a conical flask, and a wooden door with a blank name plate. Every object
+drawn in the identical style, lighting and palette described above, each object small,
+complete, and separated from the others.
+
+Output: exactly 1024 x 1024 pixels, PNG as one opaque image filling the whole canvas.
+
+Avoid: text, letters, numbers, watermark, signature, logo, UI, buttons, cursor, people, hands, faces, photorealistic, 3D render, glossy plastic, harsh contrast, neon, dark background, drop shadow on the canvas edge, cropped object, multiple viewpoints, perspective distortion

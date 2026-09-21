@@ -1,0 +1,49 @@
+# 13 - UI 아이콘 세트 (선택 사항)
+# 지금 화면은 이모지(❗ ⭐ 📚 🧪 …)와 CSS로 그리고 있다. 아래 아이콘을 만들어 주면
+# 이모지를 교체해 게임 느낌을 더 올릴 수 있다 (이 교체는 코드 수정이 필요하니 넣어만 주면 된다).
+#
+# 크기: 각각 256 x 256 px, 투명 배경 PNG, 한 파일에 하나씩.
+# 파일명: quest_mark.png / star_on.png / star_off.png / level_badge.png / stamp_clear.png
+#
+# 한 번에 만들려면 아래 [SHEET] 프롬프트로 5개를 한 장(1280x256, 가로로 나열)에 뽑은 뒤 잘라도 된다.
+
+[STYLE]
+2D game UI icon, hand-painted flat vector, soft cel shading, clean dark-brown outline
+(#5b4027) about 6 px thick at 256 px, rounded chunky shapes, warm and friendly, readable
+at 32 px. Palette: violet #7c3aed, mint #1baf7a, cream #fffdf8, sandy #d2b48c, walnut
+#8b5e3c, charcoal #1f2937, terracotta #c2410c. Transparent background, single icon
+centered, tiny soft shadow under the shape. No text, no letters, no numbers.
+
+[quest_mark.png]
+An exclamation-mark quest marker: a fat rounded exclamation mark in warm amber-gold with a
+cream highlight, sitting inside a soft violet circular glow, slightly tilted, as if
+floating. Reads instantly at small size.
+
+[star_on.png]
+A filled five-pointed achievement star in warm amber-gold with a cream inner highlight and
+a thin darker gold rim, a few small sparkle dots around it.
+
+[star_off.png]
+The exact same five-pointed star in the identical shape and size, but unearned: flat pale
+grey-beige fill (#d9d3c7) with the same outline, no sparkles, no highlight.
+
+[level_badge.png]
+A round laboratory level badge: a cream medallion with a walnut rim, a small violet conical
+flask silhouette in the middle, two short ribbon tails in mint below, no numbers anywhere.
+
+[stamp_clear.png]
+A stage-clear rubber stamp mark: a rough circular ink ring in mint (#1baf7a) with a bold
+checkmark inside, slightly rotated, with the uneven texture of a hand stamp on paper.
+
+[SHEET]  (5개를 한 장에)
+<위 [STYLE] 문단 전체>
+A row of five separate game icons on a fully transparent background, evenly spaced, not
+touching, identical style and lighting: (1) an amber exclamation-mark quest marker in a
+violet glow, (2) a filled gold achievement star with sparkles, (3) the same star in flat
+grey as an empty slot, (4) a round cream badge with a violet flask and mint ribbons,
+(5) a mint circular stamp mark with a checkmark inside.
+
+[NEGATIVE]
+text, letters, numbers, watermark, signature, logo, photorealistic, 3D render, gradient
+mesh, neon, dark background, white background, opaque background, drop shadow box, frame,
+bevel, glossy plastic

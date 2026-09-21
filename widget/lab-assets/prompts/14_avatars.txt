@@ -1,0 +1,49 @@
+# 14 - 연구원 초상 (선택 사항)
+# 자리를 누르면 열리는 서랍에 지금은 이모지가 뜬다. 초상을 넣으면 "연구실 사람들" 느낌이 산다.
+# (이것도 넣어 주면 코드에 붙이는 건 이쪽에서 한다.)
+#
+# 크기: 각각 512 x 512 px, 투명 배경 PNG, 원형으로 잘릴 것을 감안해 얼굴을 가운데.
+# 파일명: avatar_manager.png / avatar_literature.png / avatar_analysis.png /
+#         avatar_writing.png / avatar_review.png
+#
+# 매니저(키스토)는 위젯 캐릭터와 같은 사람이어야 한다. idle.mp4에서 캡처한 한 장을
+# 레퍼런스 이미지로 같이 넣고 만들 것. 나머지 넷은 서로 확실히 구분되게.
+
+[STYLE]
+Anime-style character portrait bust, head and shoulders, facing the viewer, soft cel
+shading with clean line art, warm cozy research-lab mood, muted palette (cream #f3ead9,
+walnut #8b5e3c, violet #7c3aed, mint #1baf7a, charcoal #1f2937). Friendly and calm
+expression, simple shapes that stay readable at 48 px. Fully transparent background, no
+frame, no circle border, no text. Consistent lighting from the upper left across all five
+portraits, identical rendering style and identical head size so they line up as a set.
+
+[avatar_manager.png]  (키스토 - 연구실 매니저)
+Use the attached reference image of the widget character. The same character, same hair,
+same outfit and same colours, drawn as a head-and-shoulders portrait in the style above,
+smiling gently, wearing a white lab coat over her outfit, a small violet clipboard badge
+on the collar.
+
+[avatar_literature.png]  (문헌 연구원)
+A calm young researcher with short dark hair and round glasses, white lab coat over a mint
+shirt, holding a thin stack of papers against the shoulder, a pencil tucked behind the ear.
+
+[avatar_analysis.png]  (분석 연구원)
+An energetic young researcher with tied-back light brown hair, safety goggles pushed up on
+the forehead, white lab coat over a violet shirt, one gloved hand raised holding a small
+test tube.
+
+[avatar_writing.png]  (집필 연구원)
+A thoughtful researcher with wavy shoulder-length hair, cream cardigan under an open lab
+coat, a fountain pen held near the chin as if mid-sentence, a small notebook at the
+shoulder.
+
+[avatar_review.png]  (외부 검토위원 - 다른 회사 모델 역할)
+A composed senior researcher with greying short hair and a neat beard, charcoal turtleneck
+under a grey coat, arms lightly crossed, one eyebrow slightly raised in a checking look,
+a magnifying glass clipped to the pocket. Cooler colour tone than the others to read as
+an outsider, but the same drawing style.
+
+[NEGATIVE]
+text, letters, numbers, watermark, signature, logo, frame, circle border, background,
+opaque background, white background, full body, hands covering face, photorealistic,
+3D render, sexualized, extra fingers, distorted face, heavy shading, dark mood

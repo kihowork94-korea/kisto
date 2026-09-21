@@ -1,0 +1,34 @@
+# 04 - board.png  (자리: board / 프로젝트 진행도)
+# 크기: 460 x 320 px (=230x160의 2배). 벽에 걸리는 물건 - 바닥 그림자 없음.
+# 기본 상태: 아직 붙인 것이 없는 빈 화이트보드.
+
+[STYLE]
+2D game asset, cozy research-lab interior, hand-painted flat vector illustration with
+soft cel shading and a subtle paper grain. Clean dark-brown outlines (#5b4027), rounded
+corners, slightly chunky friendly proportions, anime-adjacent children's-book warmth.
+Straight-on front elevation with a slight (about 10 degrees) top-down tilt - no vanishing
+point, no isometric skew, no camera rotation. One soft light source from the upper left;
+short warm shadows falling to the lower right. Muted warm palette only: cream wall
+#f3ead9, wainscot #eadcc4, sandy wood floor #d2b48c, walnut #8b5e3c, deep walnut #6d4529,
+paper #fffdf8, violet accent #7c3aed, mint accent #1baf7a, charcoal #1f2937. Must stay
+readable when shrunk to 25%. No text, no letters, no numbers, no logos, no watermark,
+no signature, no UI frames, no people.
+
+[CUTOUT]
+Single object, cut out on a fully transparent background (alpha PNG). No ground plane, no
+wall behind it, no scene - only the object and its own soft contact shadow, which must be
+semi-transparent so it blends onto the room floor. Trim tight: the object touches all four
+edges with at most 2% margin.
+
+[SUBJECT]
+A small white magnetic whiteboard in a light grey aluminium frame, hanging flat on a wall,
+seen straight on. The surface is nearly BLANK (#fffdf8) with a faint smudge of old eraser
+marks. A slim pen tray along the bottom edge holds two markers (violet and mint) and a
+felt eraser. Two round magnets rest in a corner. Because it hangs on a wall, give it a
+soft semi-transparent shadow hugging its outer edge only - no floor shadow.
+
+[NEGATIVE]
+text, letters, numbers, watermark, signature, logo, UI, buttons, people, hands, faces,
+photorealistic, 3D render, glossy plastic, neon, harsh contrast, white background,
+opaque background, background scene, wall, floor, room, cropped object, multiple objects,
+perspective distortion, strong drop shadow

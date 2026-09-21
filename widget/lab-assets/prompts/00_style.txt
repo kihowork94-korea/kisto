@@ -1,0 +1,35 @@
+# 00 — 공통 스타일 (STYLE BLOCK)
+#
+# 아래 [STYLE] 문단은 모든 에셋 프롬프트의 맨 앞에 그대로 들어간다.
+# 각 에셋 파일(01~) 안에는 이미 붙여 넣어 두었으니, 보통은 이 파일을 따로 쓸 일이 없다.
+# 스타일을 바꾸고 싶으면 여기만 고치고 나머지 파일의 [STYLE] 문단을 같이 바꾼다.
+#
+# 먼저 할 일: 아래 [STYLE SHEET] 프롬프트로 "스타일 견본" 한 장을 만든다.
+# 마음에 드는 장이 나오면 그 이미지를 나머지 전부의 스타일 레퍼런스(style reference /
+# 이미지 첨부)로 쓴다. 이게 12장을 한 세트처럼 보이게 만드는 가장 확실한 방법이다.
+
+[STYLE]
+2D game asset, cozy research-lab interior, hand-painted flat vector illustration with
+soft cel shading and a subtle paper grain. Clean dark-brown outlines (#5b4027), rounded
+corners, slightly chunky friendly proportions, anime-adjacent children's-book warmth.
+Straight-on front elevation with a slight (about 10 degrees) top-down tilt — no vanishing
+point, no isometric skew, no camera rotation. One soft light source from the upper left;
+short warm shadows falling to the lower right. Muted warm palette only: cream wall
+#f3ead9, wainscot #eadcc4, sandy wood floor #d2b48c, walnut #8b5e3c, deep walnut #6d4529,
+paper #fffdf8, violet accent #7c3aed, mint accent #1baf7a, charcoal #1f2937. Must stay
+readable when shrunk to 25%. No text, no letters, no numbers, no logos, no watermark,
+no signature, no UI frames, no people.
+
+[STYLE SHEET]  (먼저 한 장 만들어서 레퍼런스로 쓸 견본 — 1024x1024)
+<위 [STYLE] 문단 전체>
+Subject: a style reference sheet for a cozy research-lab game. On a plain white
+background, arranged in a loose grid with generous spacing: a walnut bookshelf, a small
+white whiteboard, an open laptop on a desk, a cork pin board, a lab bench with a test
+tube rack and a conical flask, and a wooden door with a blank name plate. Every object
+drawn in the identical style, lighting and palette described above, each object small,
+complete, and separated from the others.
+
+[NEGATIVE]  (부정 프롬프트를 받는 도구에서만)
+text, letters, numbers, watermark, signature, logo, UI, buttons, cursor, people, hands,
+faces, photorealistic, 3D render, glossy plastic, harsh contrast, neon, dark background,
+drop shadow on the canvas edge, cropped object, multiple viewpoints, perspective distortion

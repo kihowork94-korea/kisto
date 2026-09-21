@@ -1,0 +1,34 @@
+# 06 - desk.png  (자리: laptop / 집필 연구원)
+# 크기: 440 x 310 px (=220x155의 2배). 바닥에 서 있는 가구.
+# 기본 상태: 아직 초안이 없는 상태 - 노트북 화면이 꺼져 있다.
+
+[STYLE]
+2D game asset, cozy research-lab interior, hand-painted flat vector illustration with
+soft cel shading and a subtle paper grain. Clean dark-brown outlines (#5b4027), rounded
+corners, slightly chunky friendly proportions, anime-adjacent children's-book warmth.
+Straight-on front elevation with a slight (about 10 degrees) top-down tilt - no vanishing
+point, no isometric skew, no camera rotation. One soft light source from the upper left;
+short warm shadows falling to the lower right. Muted warm palette only: cream wall
+#f3ead9, wainscot #eadcc4, sandy wood floor #d2b48c, walnut #8b5e3c, deep walnut #6d4529,
+paper #fffdf8, violet accent #7c3aed, mint accent #1baf7a, charcoal #1f2937. Must stay
+readable when shrunk to 25%. No text, no letters, no numbers, no logos, no watermark,
+no signature, no UI frames, no people.
+
+[CUTOUT]
+Single object, cut out on a fully transparent background (alpha PNG). No ground plane, no
+wall behind it, no scene - only the object and its own soft contact shadow, which must be
+semi-transparent so it blends onto the room floor. Trim tight: the object touches all four
+edges with at most 2% margin.
+
+[SUBJECT]
+A small warm-wood writing desk (#a0714a top, #8b5e3c legs) with one shallow drawer, seen
+straight on, standing on its four legs. On the desk: an open laptop whose screen is
+switched OFF - a dark charcoal (#374151) panel with a faint reflection - plus a ceramic
+mug, a short stack of blank paper and a capped pen. Tidy and quiet. Soft semi-transparent
+contact shadow under the legs.
+
+[NEGATIVE]
+text, letters, numbers, watermark, signature, logo, UI, buttons, people, hands, faces,
+photorealistic, 3D render, glossy plastic, neon, harsh contrast, white background,
+opaque background, background scene, wall, floor, room, cropped object, multiple objects,
+perspective distortion, strong drop shadow

@@ -1,0 +1,15 @@
+Anime-style character portrait bust, head and shoulders, facing the viewer, soft cel
+shading with clean line art, warm cozy research-lab mood, muted palette (cream #f3ead9,
+walnut #8b5e3c, violet #7c3aed, mint #1baf7a, charcoal #1f2937). Friendly and calm
+expression, simple shapes that stay readable at 48 px. Fully transparent background, no
+frame, no circle border, no text. Consistent lighting from the upper left across all five
+portraits, identical rendering style and identical head size so they line up as a set.
+
+A composed senior researcher with greying short hair and a neat beard, charcoal turtleneck
+under a grey coat, arms lightly crossed, one eyebrow slightly raised in a checking look,
+a magnifying glass clipped to the pocket. Cooler colour tone than the others to read as
+an outsider, but the same drawing style.
+
+Output: exactly 512 x 512 pixels, PNG with a fully transparent background (alpha channel).
+
+Avoid: text, letters, numbers, watermark, signature, logo, frame, circle border, background, opaque background, white background, full body, hands covering face, photorealistic, 3D render, sexualized, extra fingers, distorted face, heavy shading, dark mood

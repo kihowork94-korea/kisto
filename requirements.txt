@@ -9,3 +9,6 @@ google-genai
 numpy
 scipy
 pandas
+
+# 에셋 전처리 스크립트용 (scripts/prep_lab_assets.py). 백엔드 동작에는 필요 없다
+pillow

@@ -1,0 +1,35 @@
+# 09 - review_board_notes.png  (자리: review, image_active)
+# 크기: 380 x 270 px. 08과 같은 보드, 같은 크기, 같은 각도 - 검토 기록이 붙은 상태.
+# 언제 보이는가: 교차검증 기록이 있을 때. 표시는 기호(체크, 엑스, 동그라미)만, 글자 금지.
+
+[STYLE]
+2D game asset, cozy research-lab interior, hand-painted flat vector illustration with
+soft cel shading and a subtle paper grain. Clean dark-brown outlines (#5b4027), rounded
+corners, slightly chunky friendly proportions, anime-adjacent children's-book warmth.
+Straight-on front elevation with a slight (about 10 degrees) top-down tilt - no vanishing
+point, no isometric skew, no camera rotation. One soft light source from the upper left;
+short warm shadows falling to the lower right. Muted warm palette only: cream wall
+#f3ead9, wainscot #eadcc4, sandy wood floor #d2b48c, walnut #8b5e3c, deep walnut #6d4529,
+paper #fffdf8, violet accent #7c3aed, mint accent #1baf7a, charcoal #1f2937. Must stay
+readable when shrunk to 25%. No text, no letters, no numbers, no logos, no watermark,
+no signature, no UI frames, no people.
+
+[CUTOUT]
+Single object, cut out on a fully transparent background (alpha PNG). No ground plane, no
+wall behind it, no scene - only the object and its own soft contact shadow, which must be
+semi-transparent so it blends onto the room floor. Trim tight: the object touches all four
+edges with at most 2% margin.
+
+[SUBJECT]
+The exact same cork pin board in the identical position and size, now covered with review
+work: six small pinned paper slips at slight random angles, each bearing only abstract pen
+squiggles; two slips marked with a mint checkmark, one marked with a terracotta cross, one
+circled in violet; a short length of red string linking two slips; the magnifying glass now
+lifted over the board as if inspecting, its lens catching a pale highlight. Same frame,
+same lighting, same edge shadow.
+
+[NEGATIVE]
+text, letters, numbers, watermark, signature, logo, UI, buttons, people, hands, faces,
+photorealistic, 3D render, glossy plastic, neon, harsh contrast, white background,
+opaque background, background scene, wall, floor, room, cropped object, multiple objects,
+perspective distortion, strong drop shadow

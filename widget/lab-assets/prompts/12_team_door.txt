@@ -1,0 +1,42 @@
+# 12 - door.png  (자리: team / 역할 부여)
+# 크기: 260 x 500 px (=130x250의 2배). 벽에 붙는 문 - 아래 끝이 바닥에 닿는 면이다.
+# 아래 [VARIANT]는 열린 문(door_open.png) - 지금 코드는 team 자리에 active 상태가 없어서
+# 당장은 안 쓰인다. 여유가 되면 같이 만들어 두면 좋다 (쓸 때 코드는 이쪽에서 붙인다).
+
+[STYLE]
+2D game asset, cozy research-lab interior, hand-painted flat vector illustration with
+soft cel shading and a subtle paper grain. Clean dark-brown outlines (#5b4027), rounded
+corners, slightly chunky friendly proportions, anime-adjacent children's-book warmth.
+Straight-on front elevation with a slight (about 10 degrees) top-down tilt - no vanishing
+point, no isometric skew, no camera rotation. One soft light source from the upper left;
+short warm shadows falling to the lower right. Muted warm palette only: cream wall
+#f3ead9, wainscot #eadcc4, sandy wood floor #d2b48c, walnut #8b5e3c, deep walnut #6d4529,
+paper #fffdf8, violet accent #7c3aed, mint accent #1baf7a, charcoal #1f2937. Must stay
+readable when shrunk to 25%. No text, no letters, no numbers, no logos, no watermark,
+no signature, no UI frames, no people.
+
+[CUTOUT]
+Single object, cut out on a fully transparent background (alpha PNG). No ground plane, no
+wall behind it, no scene - only the object and its own soft contact shadow, which must be
+semi-transparent so it blends onto the room floor. Trim tight: the object touches all four
+edges with at most 2% margin.
+
+[SUBJECT]
+A closed walnut office door (#8b5e3c panels, #6d4529 recessed inserts) in a slightly
+lighter frame, seen straight on. A small brass round handle on the right, a narrow frosted
+glass window in the upper third glowing faint warm cream, and a BLANK rectangular name
+plate mounted at eye height - the plate must be empty, with no writing at all. A small
+empty paper holder beside the frame. Soft semi-transparent shadow at the threshold where
+the door meets the floor.
+
+[VARIANT - door_open.png, 같은 크기, 같은 위치]
+The exact same door in the identical position and size, now ajar by about 20 degrees, warm
+golden light spilling out through the opening onto the threshold, the interior beyond
+suggested only as a soft warm gradient with no visible objects or people. Same frame, same
+name plate (still blank), same lighting direction, same threshold shadow.
+
+[NEGATIVE]
+text, letters, numbers, watermark, signature, logo, UI, buttons, people, hands, faces,
+photorealistic, 3D render, glossy plastic, neon, harsh contrast, white background,
+opaque background, background scene, wall, floor, room, cropped object, multiple objects,
+perspective distortion, strong drop shadow
