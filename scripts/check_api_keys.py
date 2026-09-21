@@ -9,6 +9,7 @@
 # 실패하면 이유를 한국어로 알려준다 (키 틀림 / 결제 필요 / 모델 이름 없음 …).
 # 테스트 호출은 "OK" 한 단어를 받는 정도라 비용은 무시할 만하다.
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -24,14 +25,27 @@ load_dotenv(ROOT / ".env")
 
 PROMPT = "Reply with the single word OK."
 # 어댑터(backend/adapters)의 기본값과 같아야 한다
-DEFAULT = {"openai": "gpt-5.1-codex", "gemini": "gemini-2.5-pro"}
+DEFAULT = {"openai": "gpt-5.1-codex", "gemini": "gemini-3.8-flash"}
 
 
 def masked(key: str) -> str:
     return f"…{key[-4:]} ({len(key)}자)" if len(key) > 8 else "(너무 짧음 — 잘못 붙여넣은 것 같다)"
 
 
+# 대화에 못 쓰는 모델(음성·이미지·임베딩 등)은 목록에서 뺀다
+NOT_CHAT = re.compile(r"(tts|transcri|audio|realtime|search|image|embed|whisper|dall-e|moderation|instruct|"
+                      r"babbage|davinci|sora|computer-use|customtools|16k)")
+
+
+def newest_first(names: list[str]) -> list[str]:
+    """버전 숫자가 큰 것부터 (gpt-5.5 > gpt-5.4 > gpt-4o, gemini-3.8 > gemini-2.5)."""
+    def version(n: str):
+        return [int(x) for x in re.findall(r"\d+", n.split("-20")[0])] or [0]
+    return sorted((n for n in names if not NOT_CHAT.search(n)), key=lambda n: (version(n), n), reverse=True)
+
+
 def show_models(names: list[str], current: str, limit: int = 25) -> None:
+    names = newest_first(names)
     if not names:
         print("   쓸 수 있는 모델을 찾지 못했다")
         return
@@ -55,7 +69,7 @@ def check_openai() -> bool:
     client = openai.OpenAI(api_key=key)
     model = os.environ.get("OPENAI_MODEL") or DEFAULT["openai"]
     try:
-        names = sorted(m.id for m in client.models.list() if m.id.startswith(("gpt", "o")))
+        names = [m.id for m in client.models.list() if m.id.startswith(("gpt", "o"))]
         show_models(names, model)
     except openai.AuthenticationError:
         print("   ✗ 키가 틀렸다 (401). platform.openai.com → API keys에서 새로 만들어 다시 붙여넣을 것")
@@ -98,7 +112,7 @@ def check_gemini() -> bool:
     client = genai.Client(api_key=key)
     model = os.environ.get("GEMINI_MODEL") or DEFAULT["gemini"]
     try:
-        names = sorted(
+        names = list(
             m.name.removeprefix("models/")
             for m in client.models.list()
             if "gemini" in (m.name or "") and "generateContent" in (m.supported_actions or [])
@@ -123,7 +137,8 @@ def check_gemini() -> bool:
         return True
     except errors.ClientError as e:
         if e.code == 404:
-            print(f"   ✗ '{model}' 모델이 없다 → .env의 GEMINI_MODEL을 위 목록 중 하나로")
+            print(f"   ✗ '{model}' 모델을 쓸 수 없다 → .env의 GEMINI_MODEL을 위 목록 중 하나로")
+            print(f"     Google 안내: {(e.message or '')[:160]}")
         elif e.code == 429:
             print("   ✗ 호출 한도 초과 (429) — 무료 등급 한도일 수 있다. 잠시 뒤 다시, 또는 결제 등록")
         else:

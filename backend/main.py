@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 import tracing
-from config import available_providers, get_adapter, get_verifier_adapter
+from config import UNAVAILABLE, available_providers, get_adapter, get_verifier_adapter
 from instructions import with_custom_instructions
 from lab import ROLES, dashboard, lab_overview, load_settings, save_settings
 from literature import format_reference_list
@@ -97,7 +97,8 @@ class UploadRequest(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"providers": available_providers()}
+    # unavailable: 키는 있지만 호출이 영구 실패해서(모델 없음·크레딧 없음 등) 건너뛰는 provider와 이유
+    return {"providers": available_providers(), "unavailable": UNAVAILABLE}
 
 
 @app.get("/threads/{session_id}")
@@ -247,13 +248,13 @@ def _chat(req: ChatRequest):
         produced_by = adapter.name
     elif module == "analysis_partner":
         raw = analysis_partner.run(req.session_id, message)
-        produced_by = get_adapter("analysis_partner").name
+        produced_by = tracing.answered("analysis_partner") or get_adapter("analysis_partner").name
     elif module == "writing_coach":
         raw = writing_coach.run(req.session_id, message)
-        produced_by = get_adapter("writing_coach").name
+        produced_by = tracing.answered("writing_coach") or get_adapter("writing_coach").name
     else:  # research_coach 및 그 외 fallback
         raw, sources = research_coach.run(req.session_id, message, routing.get("search_query"))
-        produced_by = get_adapter("research_coach").name
+        produced_by = tracing.answered("research_coach") or get_adapter("research_coach").name
 
     def respond(reply: str, review: str | None, verified_by: str | None) -> dict:
         seconds = round(time.perf_counter() - started, 1)
@@ -298,7 +299,7 @@ def _chat(req: ChatRequest):
     if module == "analysis_partner":
         record_verification(req.session_id, check)
     review = None if "특이사항 없음" in check else check.strip()
-    verified_by = get_verifier_adapter(exclude=produced_by).name
+    verified_by = tracing.answered("verifier") or get_verifier_adapter(exclude=produced_by).name
     # 연구실의 검토 데스크에 쌓이는 기록 (로드맵 4단계 판정은 분석 검증만 따로 센다).
     add_review(req.session_id, {
         "stage": MODULE_LABEL.get(module, module),

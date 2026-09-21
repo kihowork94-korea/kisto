@@ -12,6 +12,8 @@ from contextvars import ContextVar
 _steps: ContextVar[list | None] = ContextVar("kisto_trace_steps", default=None)
 _current: ContextVar[dict | None] = ContextVar("kisto_trace_current", default=None)
 _session: ContextVar[str | None] = ContextVar("kisto_trace_session", default=None)
+# 역할별로 이번 요청에서 실제로 답한 provider (폴백되면 1순위와 다를 수 있다)
+_answers: ContextVar[dict | None] = ContextVar("kisto_trace_answers", default=None)
 
 # 세션별로 "지금 어느 에이전트가 일하는 중인지" — 위젯이 기다리는 동안 보여준다 (GET /progress).
 LIVE: dict[str, dict] = {}
@@ -30,6 +32,7 @@ def start(session_id: str | None = None) -> list:
     _steps.set(steps)
     _current.set(None)
     _session.set(session_id)
+    _answers.set({})
     return steps
 
 
@@ -62,6 +65,17 @@ def step(agent: str, detail: str | None = None):
                     parent["models"].append(m)
 
 
+def note_answer(role: str, provider: str) -> None:
+    answers = _answers.get()
+    if answers is not None:
+        answers[role] = provider
+
+
+def answered(role: str) -> str | None:
+    """이번 요청에서 이 역할에 실제로 답한 provider (아직 안 불렸으면 None)."""
+    return (_answers.get() or {}).get(role)
+
+
 def note_model(provider: str) -> None:
     record = _current.get()
     if record is not None:
@@ -78,5 +92,6 @@ class TracingAdapter:
         self.name = inner.name
 
     def generate(self, system_prompt: str, messages: list[dict]) -> str:
-        note_model(self._inner.name)
-        return self._inner.generate(system_prompt, messages)
+        text = self._inner.generate(system_prompt, messages)
+        note_model(self._inner.name)  # 실패한 호출은 '답한 모델'로 표시하지 않는다
+        return text
