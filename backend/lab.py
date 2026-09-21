@@ -6,6 +6,7 @@
 """
 
 import json
+import time
 
 from memory.store import DATA_DIR, STAGES, thread_progress
 
@@ -116,9 +117,114 @@ def _company(model_label: str) -> str | None:
     return next((c for key, c in _COMPANY.items() if key in model_label), None)
 
 
-def dashboard(threads: list[dict]) -> dict:
-    """연구실 전체 진행을 한 화면에 — 모든 프로젝트를 합친 지표, 단계 퍼널, 연구원별 업무·시간,
-    회사별 모델 사용, 최근 활동 타임라인."""
+# 검토 기록의 stage 문구("분석 연구원의 분석 결과" 등) → 결과를 만든 연구원
+_PRODUCER_WORDS = (("문헌", "research_coach"), ("분석", "analysis_partner"), ("집필", "writing_coach"))
+_PRODUCERS = [role for _, role in _PRODUCER_WORDS]
+_DOING = {
+    "research_coach": "선행 연구·가설 정리",
+    "analysis_partner": "데이터 분석",
+    "writing_coach": "초안 작업",
+}
+
+
+def _producer_of(stage: str | None) -> str | None:
+    return next((role for word, role in _PRODUCER_WORDS if word in (stage or "")), None)
+
+
+def org_chart(threads: list[dict], live: dict | None = None) -> dict:
+    """연구실 조직도·업무 흐름 — 누가 누구에게 일을 받아 무엇을 넘겼고, 지금 누가 일하는지.
+
+    선 위의 숫자와 카드의 내용은 전부 저장된 기록(activity·reviews·산출물)에서 센다.
+    live는 tracing.LIVE의 한 항목 (지금 진행 중인 요청이 없으면 None).
+    """
+    nodes = {
+        r["key"]: {"key": r["key"], "name": r["name"], "place": r["place"], "duty": r["duty"], "emoji": r["emoji"],
+                   "requests": 0, "seconds": 0.0, "models": [], "last": None, "working": None}
+        for r in ROLES
+    }
+    reviews = {role: {"count": 0, "issues": 0, "cross": 0} for role in _PRODUCERS}
+    counts = {"turns": 0, "papers": 0, "hypotheses": 0, "analyses": 0, "analyses_ok": 0, "drafts": 0,
+              "hypothesis_projects": 0, "analysis_projects": 0}
+
+    def touch(role: str, at: str | None, text: str) -> None:
+        last = nodes[role]["last"]
+        if at and (last is None or at > last["at"]):
+            nodes[role]["last"] = {"at": at, "text": text}
+
+    for t in threads:
+        topic = t.get("topic", "(제목 없음)")
+        counts["papers"] += len(t.get("references", []))
+        counts["hypotheses"] += len(t.get("hypotheses", []))
+        counts["analyses"] += len(t.get("analysis", []))
+        counts["analyses_ok"] += sum(1 for a in t.get("analysis", []) if a.get("ok", True))
+        counts["drafts"] += 1 if t.get("draft") else 0
+        # 다음 연구원에게 넘어간 산출물: 가설이 있는 프로젝트 → 분석, 분석이 있는 프로젝트 → 집필
+        counts["hypothesis_projects"] += 1 if t.get("hypotheses") else 0
+        counts["analysis_projects"] += 1 if t.get("analysis") else 0
+
+        for act in t.get("activity", []):
+            counts["turns"] += 1
+            module = act.get("module")
+            if module in nodes:
+                nodes[module]["requests"] += 1
+                touch(module, act.get("at"), f"{_DOING.get(module, '작업')} · {topic}")
+            owner = nodes[module]["name"] if module in nodes else "키스토"
+            message = act.get("message", "")
+            touch("manager", act.get("at"),
+                  f"{owner}에게 전달 · “{message[:40]}{'…' if len(message) > 40 else ''}”")
+            for step in act.get("steps", []):
+                role = _ROLE_OF_STEP.get(step["agent"])
+                if not role:
+                    continue
+                nodes[role]["seconds"] += step.get("seconds") or 0
+                for model in step.get("models", []):
+                    if _company(model) and model not in nodes[role]["models"]:
+                        nodes[role]["models"].append(model)
+
+        for r in t.get("reviews", []):
+            role = _producer_of(r.get("stage"))
+            if role:
+                reviews[role]["count"] += 1
+                reviews[role]["issues"] += 1 if r.get("issues") else 0
+                reviews[role]["cross"] += 1 if r.get("producer") != r.get("reviewer") else 0
+            touch("verifier", r.get("at"),
+                  f"{'지적 있음' if r.get('issues') else '특이사항 없음'} · {r.get('stage', '결과')} 검토")
+
+    total_reviews = sum(v["count"] for v in reviews.values())
+    summary = {
+        "manager": f"대화 {counts['turns']}번을 받아 나눠 줌",
+        "research_coach": f"실제 논문 {counts['papers']}편 · 가설 정리 {counts['hypotheses']}건",
+        "analysis_partner": f"분석 {counts['analyses']}건 (성공 {counts['analyses_ok']})",
+        "writing_coach": f"초안 {counts['drafts']}편",
+        "verifier": f"검토 {total_reviews}건 · 지적 {sum(v['issues'] for v in reviews.values())}건",
+    }
+    for key, node in nodes.items():
+        node["summary"] = summary[key]
+        node["seconds"] = round(node["seconds"], 1)
+
+    if live:
+        role = _ROLE_OF_STEP.get(live.get("agent"))
+        if role:
+            nodes[role]["working"] = {"step": live["agent"], "seconds": round(time.time() - live["since"], 1)}
+
+    return {
+        "nodes": nodes,
+        "live": any(n["working"] for n in nodes.values()),
+        "edges": {
+            "turns": counts["turns"],
+            "requests": {role: nodes[role]["requests"] for role in _PRODUCERS},
+            "handoffs": {
+                "research_coach": counts["hypothesis_projects"],  # 문헌 → 분석: 가설
+                "analysis_partner": counts["analysis_projects"],  # 분석 → 집필: 분석 결과
+            },
+            "reviews": reviews,
+        },
+    }
+
+
+def dashboard(threads: list[dict], live: dict | None = None) -> dict:
+    """연구실 전체 진행을 한 화면에 — 모든 프로젝트를 합친 지표, 조직도·업무 흐름, 단계 퍼널,
+    연구원별 업무·시간, 회사별 모델 사용, 최근 활동 타임라인."""
     overview = lab_overview(threads)
     role_seconds = {r["key"]: 0.0 for r in ROLES}
     company_calls: dict[str, int] = {}
@@ -199,6 +305,7 @@ def dashboard(threads: list[dict]) -> dict:
         "companies": [{"company": c, "calls": company_calls.get(c, 0)} for c in _COMPANY.values()],
         "projects": overview["projects"],
         "timeline": timeline[:40],
+        "org": org_chart(threads, live),
     }
 
 

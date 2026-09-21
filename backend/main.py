@@ -167,7 +167,7 @@ def lab_session(session_id: str):
 @app.get("/lab/session/{session_id}/dashboard")
 def lab_dashboard(session_id: str):
     """연구실 대시보드 — 전체 진행 지표, 단계 퍼널, 연구원별 업무·시간, 회사별 모델 사용, 타임라인."""
-    return dashboard(get_session(session_id)["threads"])
+    return dashboard(get_session(session_id)["threads"], live=tracing.LIVE.get(session_id))
 
 
 @app.post("/upload")

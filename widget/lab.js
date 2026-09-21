@@ -545,6 +545,135 @@ function bars(rows, { unit = "", format = (v) => v } = {}) {
     .join("")}</div>`;
 }
 
+// ── 조직도·업무 흐름: 누가 누구에게 일을 받아 무엇을 넘겼는지, 지금 누가 일하는지 ──
+function fmtAgo(at) {
+  const t = new Date(at);
+  if (isNaN(t)) return "";
+  const min = Math.floor((Date.now() - t.getTime()) / 60000);
+  if (min < 1) return "방금";
+  if (min < 60) return `${min}분 전`;
+  if (min < 60 * 24) return `${Math.floor(min / 60)}시간 전`;
+  return `${Math.floor(min / 60 / 24)}일 전`;
+}
+
+const ORG_W = 290; // 연구원 카드 크기 (viewBox 좌표)
+const ORG_H = 104;
+const ORG_POS = {
+  manager: [520, 116],
+  research_coach: [175, 300],
+  analysis_partner: [520, 300],
+  writing_coach: [865, 300],
+  verifier: [520, 470],
+};
+
+function orgModelPills(models) {
+  if (!models.length) return `<span class="opill none">아직 모델 호출 없음</span>`;
+  return models
+    .map((m) => {
+      const company = Object.keys(COMPANY_COLOR).find((c) => m.includes(c));
+      return `<span class="opill"><i style="background:${COMPANY_COLOR[company] || "var(--text-muted)"}"></i>${esc(m)}</span>`;
+    })
+    .join("");
+}
+
+function orgNode(n, extra = "") {
+  const [cx, top] = ORG_POS[n.key];
+  const status = n.working
+    ? `<b class="live">● 지금 ${esc(n.working.step)} 중 · ${Math.round(n.working.seconds)}초째</b>`
+    : n.last
+    ? `<span class="ago">${esc(fmtAgo(n.last.at))}</span> ${esc(n.last.text)}`
+    : `<span class="ago">아직 일한 기록이 없어요</span>`;
+  return `<foreignObject x="${cx - ORG_W / 2}" y="${top}" width="${ORG_W}" height="${ORG_H}">
+      <div class="onode ${n.working ? "working" : ""}" title="${esc(n.duty)}">
+        <div class="av">${avatar(n.key, n.emoji)}</div>
+        <div class="body">
+          <div class="nm">${esc(n.name)} <span class="place">· ${esc(n.place)}</span></div>
+          <div class="st" title="${esc(n.last ? n.last.text : "")}">${status}</div>
+          <div class="sm">${esc(n.summary)}${n.seconds ? ` · ${fmtSeconds(n.seconds)}` : ""}${extra}</div>
+          <div class="models">${orgModelPills(n.models)}</div>
+        </div>
+      </div>
+    </foreignObject>`;
+}
+
+function renderOrg(org) {
+  const N = org.nodes;
+  const e = org.edges;
+  const bottom = (k) => ORG_POS[k][1] + ORG_H;
+  const top = (k) => ORG_POS[k][1];
+  const x = (k) => ORG_POS[k][0];
+  // 검토 선 색: 모두 다른 회사가 검토 → 초록, 하나라도 같은 회사 → 주황, 검토 없음 → 회색
+  const reviewKind = (r) => (!r.count ? "none" : r.cross === r.count ? "good" : "warn");
+  const flowTo = (k) => (N[k].working ? " flow" : "");
+  const label = (lx, ly, text, cls = "") => `<text class="olabel ${cls}" x="${lx}" y="${ly}">${esc(text)}</text>`;
+
+  const producers = ["research_coach", "analysis_partner", "writing_coach"];
+  const busY = 258;
+  let edges = "";
+  // 연구 책임자 → 매니저
+  edges += `<path class="oedge req${flowTo("manager")}" d="M520,${62} V${top("manager")}" marker-end="url(#oa-req)"/>`;
+  edges += label(530, 94, `대화 ${e.turns}번`);
+  // 매니저 → 세 연구원 (요청)
+  for (const k of producers) {
+    const d = x(k) === 520 ? `M520,${bottom("manager")} V${top(k)}` : `M520,${bottom("manager")} V${busY} H${x(k)} V${top(k)}`;
+    edges += `<path class="oedge req${flowTo(k)}" d="${d}" marker-end="url(#oa-req)"/>`;
+    edges += label(x(k) + 8, busY + 22, `요청 ${e.requests[k]}회`);
+  }
+  // 문헌 → 분석 → 집필 (산출물이 넘어간 프로젝트 수)
+  const gapL = x("research_coach") + ORG_W / 2;
+  const gapR = x("analysis_partner") - ORG_W / 2;
+  const handY = top("research_coach") + ORG_H / 2;
+  edges += `<path class="oedge hand" d="M${gapL},${handY} H${gapR}" marker-end="url(#oa-hand)"/>`;
+  edges += label((gapL + gapR) / 2, handY - 8, "가설", "mid");
+  edges += label((gapL + gapR) / 2, handY + 17, `${e.handoffs.research_coach}건`, "mid num");
+  const gapL2 = x("analysis_partner") + ORG_W / 2;
+  const gapR2 = x("writing_coach") - ORG_W / 2;
+  edges += `<path class="oedge hand" d="M${gapL2},${handY} H${gapR2}" marker-end="url(#oa-hand)"/>`;
+  edges += label((gapL2 + gapR2) / 2, handY - 8, "결과", "mid");
+  edges += label((gapL2 + gapR2) / 2, handY + 17, `${e.handoffs.analysis_partner}건`, "mid num");
+  // 세 연구원의 결과 → 외부 검토위원 (점선)
+  const vTop = top("verifier");
+  const vMid = vTop + ORG_H / 2;
+  for (const k of producers) {
+    const r = e.reviews[k];
+    const kind = reviewKind(r);
+    const d = x(k) === 520
+      ? `M520,${bottom(k)} V${vTop}`
+      : `M${x(k)},${bottom(k)} V${vMid} H${x(k) < 520 ? 520 - ORG_W / 2 : 520 + ORG_W / 2}`;
+    edges += `<path class="oedge review ${kind}${flowTo("verifier")}" d="${d}" marker-end="url(#oa-${kind})"/>`;
+    const text = r.count ? `검토 ${r.count} · 지적 ${r.issues}` : "검토 없음";
+    edges += label(x(k) + 8, bottom(k) + 26, text, kind);
+  }
+
+  const totalReviews = producers.reduce((a, k) => a + e.reviews[k].count, 0);
+  const cross = producers.reduce((a, k) => a + e.reviews[k].cross, 0);
+  const crossNote = totalReviews ? `<br><span class="${cross === totalReviews ? "okc" : "warnc"}">다른 회사 검토 ${cross}/${totalReviews}</span>` : "";
+
+  const marker = (id) =>
+    `<marker id="oa-${id}" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto-start-reverse">
+       <path class="ohead ${id}" d="M0,0 L10,5 L0,10 z"/></marker>`;
+
+  return `<svg class="org" viewBox="0 0 1040 580" role="img" aria-label="연구실 조직도와 업무 흐름">
+      <defs>${["req", "hand", "good", "warn", "none"].map(marker).join("")}</defs>
+      ${edges}
+      <foreignObject x="${520 - 130}" y="0" width="260" height="62">
+        <div class="onode pi"><div class="av">🎓</div><div class="body">
+          <div class="nm">연구 책임자 (나)</div>
+          <div class="st">주제와 해석을 정하고, 결과를 판단</div></div></div>
+      </foreignObject>
+      ${orgNode(N.manager)}
+      ${producers.map((k) => orgNode(N[k])).join("")}
+      ${orgNode(N.verifier, crossNote)}
+    </svg>
+    <div class="org-legend">
+      <span><i class="lg req"></i>일 요청</span>
+      <span><i class="lg hand"></i>산출물 전달 (넘어간 프로젝트 수)</span>
+      <span><i class="lg good"></i>교차검증 — 다른 회사 모델</span>
+      <span><i class="lg warn"></i>교차검증 — 같은 회사 모델</span>
+      <span><b class="live">●</b> 지금 일하는 중</span>
+    </div>`;
+}
+
 function renderDashboard(d) {
   const t = d.totals;
   const crossRate = t.reviews ? Math.round((t.cross_vendor_reviews / t.reviews) * 100) : 0;
@@ -603,6 +732,11 @@ function renderDashboard(d) {
 
   $("dashboard").innerHTML = `
     <div class="dash-grid kpis">${kpis}</div>
+    <div class="panel org-panel">
+      <h3>연구실 조직도 · 업무 흐름</h3>
+      <p class="desc">연구원마다 누구에게 일을 받아 무엇을 넘겼는지, 지금 누가 일하는지 — 선 위의 숫자는 전부 저장된 기록에서 셌어요</p>
+      <div id="org-body">${renderOrg(d.org)}</div>
+    </div>
     <div class="dash-grid two">
       <div class="panel"><h3>단계별 진행 (퍼널)</h3><p class="desc">각 단계까지 클리어한 프로젝트 수</p>${funnel}</div>
       <div class="panel"><h3>회사별 모델 호출</h3><p class="desc">연구원들이 어느 회사 모델을 몇 번 불렀는지 — 교차검증이 여러 회사에 걸쳐 일어나는지 보여줘요</p>${stack}${legend}</div>
@@ -619,10 +753,16 @@ function renderDashboard(d) {
     </div>`;
 }
 
-async function loadDashboard() {
+// 누군가 일하는 중이면 조직도만 몇 초마다 다시 그린다 (나머지 패널은 20초 주기 그대로 — 스크롤이 튀지 않게)
+let orgTimer = null;
+async function loadDashboard({ orgOnly = false } = {}) {
   if (!sessionId) return;
+  clearTimeout(orgTimer);
   try {
-    renderDashboard(await getJSON(`/lab/session/${encodeURIComponent(sessionId)}/dashboard`));
+    const d = await getJSON(`/lab/session/${encodeURIComponent(sessionId)}/dashboard`);
+    if (orgOnly && $("org-body")) $("org-body").innerHTML = renderOrg(d.org);
+    else renderDashboard(d);
+    if (d.org.live && tab === "dashboard") orgTimer = setTimeout(() => loadDashboard({ orgOnly: true }), 2500);
   } catch {
     $("dashboard").innerHTML = `<div class="panel empty">대시보드를 불러오지 못했어요. 키스토 서버가 켜져 있는지 확인해 주세요.</div>`;
   }

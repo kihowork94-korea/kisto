@@ -359,3 +359,72 @@ main[hidden], #dashboard[hidden] { display: none; }
 #topbar { flex-wrap: nowrap; }
 .project-pick { min-width: 0; }
 #project { min-width: 0; max-width: 300px; }
+
+/* ── 조직도 · 업무 흐름 ──
+   선은 세 종류: 일 요청(실선, 짙은 회색) · 산출물 전달(실선, 보라) · 교차검증(점선, 다른 회사면 초록/같은 회사면 주황).
+   지금 일하는 연구원은 카드 테두리가 빛나고, 그 연구원에게 들어가는 선에 흐르는 점이 움직인다. */
+.org-panel { margin-top: 14px; }
+.org { display: block; width: 100%; max-width: 1080px; margin: 4px auto 0; overflow: visible; }
+.oedge { fill: none; stroke-width: 2; stroke-linejoin: round; }
+.oedge.req { stroke: #6b6558; }
+.oedge.hand { stroke: var(--accent); stroke-width: 2.5; }
+.oedge.review { stroke-dasharray: 6 5; }
+.oedge.review.good { stroke: var(--good); }
+.oedge.review.warn { stroke: var(--warning); }
+.oedge.review.none { stroke: #cfc7b8; }
+.oedge.flow { stroke-dasharray: 3 7; stroke-width: 3; animation: flow 0.7s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -20; } }
+.ohead.req { fill: #6b6558; }
+.ohead.hand { fill: var(--accent); }
+.ohead.good { fill: var(--good); }
+.ohead.warn { fill: var(--warning); }
+.ohead.none { fill: #cfc7b8; }
+.olabel {
+  font-size: 12px; font-weight: 700; fill: var(--text-secondary);
+  paint-order: stroke; stroke: var(--surface-1); stroke-width: 5px; stroke-linejoin: round;
+}
+.olabel.mid { text-anchor: middle; }
+.olabel.num { font-weight: 800; fill: var(--accent); }
+.olabel.good { fill: var(--good); }
+.olabel.warn { fill: var(--warning); }
+.olabel.none { fill: var(--text-muted); font-weight: 600; }
+
+.onode {
+  box-sizing: border-box; height: 100%; display: flex; gap: 10px; align-items: center;
+  padding: 8px 10px; border-radius: 14px; background: #fff; border: 1.5px solid var(--grid);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07); font-size: 12px; line-height: 1.35; color: var(--text-primary);
+}
+.onode.pi { background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f3d27a; }
+.onode.pi .av { font-size: 26px; width: 40px; text-align: center; }
+.onode .av { flex: none; font-size: 30px; }
+.onode .av .avatar { width: 58px; height: 58px; }
+.onode .body { min-width: 0; flex: 1; }
+.onode .nm { font-weight: 800; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.onode .place { font-weight: 500; color: var(--text-muted); font-size: 11.5px; }
+.onode .st { color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.onode .st .ago { color: var(--text-muted); }
+.onode .sm { color: var(--text-secondary); margin-top: 1px; }
+.onode .sm .okc { color: var(--good); font-weight: 700; }
+.onode .sm .warnc { color: var(--warning); font-weight: 700; }
+.onode .models { margin-top: 3px; display: flex; flex-wrap: wrap; gap: 4px; }
+.opill {
+  display: inline-flex; align-items: center; gap: 4px; padding: 0 7px; border-radius: 999px;
+  border: 1px solid var(--grid); font-size: 10.5px; color: var(--text-secondary); background: #fffdf8;
+}
+.opill i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.opill.none { color: var(--text-muted); }
+.onode.working { border-color: var(--accent); animation: glow 1.4s ease-in-out infinite; }
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 0 2px var(--accent-soft), 0 0 10px rgba(124, 58, 237, 0.25); }
+  50% { box-shadow: 0 0 0 4px var(--accent-soft), 0 0 18px rgba(124, 58, 237, 0.5); }
+}
+.live { color: var(--accent); }
+.org-legend {
+  display: flex; flex-wrap: wrap; gap: 6px 18px; justify-content: center; margin-top: 8px;
+  font-size: 11.5px; color: var(--text-secondary);
+}
+.org-legend .lg { display: inline-block; width: 22px; height: 0; vertical-align: middle; margin-right: 5px; border-top: 2px solid; }
+.org-legend .lg.req { border-color: #6b6558; }
+.org-legend .lg.hand { border-color: var(--accent); border-top-width: 3px; }
+.org-legend .lg.good { border-color: var(--good); border-top-style: dashed; }
+.org-legend .lg.warn { border-color: var(--warning); border-top-style: dashed; }
