@@ -1,6 +1,7 @@
 2D game UI icon, hand-painted flat vector, soft cel shading, clean dark-brown outline
 (#5b4027) about 6 px thick at 256 px, rounded chunky shapes, warm and friendly, readable
 at 32 px. Palette: violet #7c3aed, mint #1baf7a, cream #fffdf8, sandy #d2b48c, walnut
+#8b5e3c, charcoal #1f2937, terracotta #c2410c. Transparent background, single icon
 centered, tiny soft shadow under the shape. No text, no letters, no numbers.
 
 The exact same five-pointed star in the identical shape and size, but unearned: flat pale
