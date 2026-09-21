@@ -571,25 +571,28 @@ function orgModelPills(models) {
   return models
     .map((m) => {
       const company = Object.keys(COMPANY_COLOR).find((c) => m.includes(c));
-      return `<span class="opill"><i style="background:${COMPANY_COLOR[company] || "var(--text-muted)"}"></i>${esc(m)}</span>`;
+      // 카드 한 줄에 여러 회사가 들어가도록 모델 이름만 보이고, 회사까지 붙은 전체 이름은 마우스를 올리면
+      const short = m.split(" · ")[0];
+      return `<span class="opill" title="${esc(m)}"><i style="background:${COMPANY_COLOR[company] || "var(--text-muted)"}"></i>${esc(short)}</span>`;
     })
     .join("");
 }
 
-function orgNode(n, extra = "") {
+function orgNode(n, extra = "", height = ORG_H) {
   const [cx, top] = ORG_POS[n.key];
   const status = n.working
     ? `<b class="live">● 지금 ${esc(n.working.step)} 중 · ${Math.round(n.working.seconds)}초째</b>`
     : n.last
     ? `<span class="ago">${esc(fmtAgo(n.last.at))}</span> ${esc(n.last.text)}`
     : `<span class="ago">아직 일한 기록이 없어요</span>`;
-  return `<foreignObject x="${cx - ORG_W / 2}" y="${top}" width="${ORG_W}" height="${ORG_H}">
+  return `<foreignObject x="${cx - ORG_W / 2}" y="${top}" width="${ORG_W}" height="${height}">
       <div class="onode ${n.working ? "working" : ""}" title="${esc(n.duty)}">
         <div class="av">${avatar(n.key, n.emoji)}</div>
         <div class="body">
           <div class="nm">${esc(n.name)} <span class="place">· ${esc(n.place)}</span></div>
           <div class="st" title="${esc(n.last ? n.last.text : "")}">${status}</div>
-          <div class="sm">${esc(n.summary)}${n.seconds ? ` · ${fmtSeconds(n.seconds)}` : ""}${extra}</div>
+          <div class="sm">${esc(n.summary)}${n.seconds ? ` · ${fmtSeconds(n.seconds)}` : ""}</div>
+          ${extra}
           <div class="models">${orgModelPills(n.models)}</div>
         </div>
       </div>
@@ -647,13 +650,13 @@ function renderOrg(org) {
 
   const totalReviews = producers.reduce((a, k) => a + e.reviews[k].count, 0);
   const cross = producers.reduce((a, k) => a + e.reviews[k].cross, 0);
-  const crossNote = totalReviews ? `<br><span class="${cross === totalReviews ? "okc" : "warnc"}">다른 회사 검토 ${cross}/${totalReviews}</span>` : "";
+  const crossNote = totalReviews ? `<div class="sm"><span class="${cross === totalReviews ? "okc" : "warnc"}">다른 회사 모델 검토 ${cross}/${totalReviews}</span></div>` : "";
 
   const marker = (id) =>
     `<marker id="oa-${id}" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto-start-reverse">
        <path class="ohead ${id}" d="M0,0 L10,5 L0,10 z"/></marker>`;
 
-  return `<svg class="org" viewBox="0 0 1040 580" role="img" aria-label="연구실 조직도와 업무 흐름">
+  return `<svg class="org" viewBox="0 0 1040 596" role="img" aria-label="연구실 조직도와 업무 흐름">
       <defs>${["req", "hand", "good", "warn", "none"].map(marker).join("")}</defs>
       ${edges}
       <foreignObject x="${520 - 130}" y="0" width="260" height="62">
@@ -663,7 +666,7 @@ function renderOrg(org) {
       </foreignObject>
       ${orgNode(N.manager)}
       ${producers.map((k) => orgNode(N[k])).join("")}
-      ${orgNode(N.verifier, crossNote)}
+      ${orgNode(N.verifier, crossNote, crossNote ? ORG_H + 18 : ORG_H)}
     </svg>
     <div class="org-legend">
       <span><i class="lg req"></i>일 요청</span>

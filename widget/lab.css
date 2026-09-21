@@ -406,7 +406,8 @@ main[hidden], #dashboard[hidden] { display: none; }
 .onode .sm { color: var(--text-secondary); margin-top: 1px; }
 .onode .sm .okc { color: var(--good); font-weight: 700; }
 .onode .sm .warnc { color: var(--warning); font-weight: 700; }
-.onode .models { margin-top: 3px; display: flex; flex-wrap: wrap; gap: 4px; }
+.onode .models { margin-top: 3px; display: flex; flex-wrap: nowrap; gap: 4px; overflow: hidden; }
+.onode .sm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .opill {
   display: inline-flex; align-items: center; gap: 4px; padding: 0 7px; border-radius: 999px;
   border: 1px solid var(--grid); font-size: 10.5px; color: var(--text-secondary); background: #fffdf8;
