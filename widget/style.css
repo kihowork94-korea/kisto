@@ -190,7 +190,21 @@ body.thinking .dots { display: inline-flex; gap: 2px; vertical-align: middle; }
   12%, 80% { transform: none; opacity: 1; }
   100% { transform: translateY(-10px); opacity: 0; }
 }
-#sparkles { position: absolute; right: 0; bottom: 0; width: var(--char-width); height: var(--char-height, 330px); pointer-events: none; }
+/* 캐릭터(#character-wrap)보다 DOM이 앞이라 z-index가 없으면 캐릭터 뒤에 가려진다 */
+#sparkles { z-index: 3; position: absolute; right: 0; bottom: 0; width: var(--char-width); height: var(--char-height, 330px); pointer-events: none; }
+/* 단계 클리어 도장 (lab-assets/stamp_clear.png가 있을 때) */
+.node.cleared .dot:has(.stamp) { background: #fff; border-color: #1baf7a; }
+.node .dot .stamp { width: 24px; height: 24px; }
+#sparkles .clear-stamp {
+  position: absolute; left: 50%; top: 18%; width: 96px; height: 96px; margin-left: -48px;
+  animation: stamp 2.4s ease-out forwards;
+}
+@keyframes stamp {
+  0% { transform: scale(2.4) rotate(-18deg); opacity: 0; }
+  14% { transform: scale(0.92) rotate(-8deg); opacity: 1; }
+  22%, 75% { transform: scale(1) rotate(-8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(-8deg) translateY(-14px); opacity: 0; }
+}
 #sparkles span {
   position: absolute; font-size: 16px;
   animation: sparkle 1.4s ease-out forwards;

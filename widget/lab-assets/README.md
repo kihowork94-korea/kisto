@@ -54,3 +54,19 @@
 | `review` | 교차검증 기록이 1건 이상 |
 | `bench` | 분석 결과가 1건 이상 |
 | `team` | (없음 — 문은 항상 기본 이미지) |
+
+## UI 아이콘·연구원 초상 (선택)
+
+`lab.json`의 `icons`·`avatars`에 적으면 이모지 대신 그림이 쓰인다. 적지 않은 항목은 원래
+이모지·글자(❗ ★ ☆ ✓ 🏆 📚 …)로 그대로 그린다.
+
+| 키 | 파일 (규격) | 쓰이는 곳 |
+|---|---|---|
+| `icons.quest` | `quest_mark.png` (256×256) | 장면의 다음 할 일 표시 ❗, 안내 말풍선 |
+| `icons.star_on` / `icons.star_off` | `star_on.png` / `star_off.png` | 상단 바와 퀘스트 보드의 별 |
+| `icons.level` | `level_badge.png` | 상단 바 `Lv.` 배지, 퀘스트 보드 레벨 카드 |
+| `icons.clear` | `stamp_clear.png` | 로드맵의 클리어한 단계(✓), 완주 표시(🏆), **위젯의 단계 클리어 연출** |
+| `avatars.<역할 키>` | `avatar_*.png` (512×512) | 서랍의 연구원 카드, 연구원 명단. `manager`는 안내 말풍선의 얼굴 |
+
+역할 키는 `backend/lab.py`의 `ROLES`: `manager`, `research_coach`, `analysis_partner`,
+`writing_coach`, `verifier`. `python scripts\check_lab_assets.py`가 이 두 항목도 점검한다.

@@ -35,6 +35,7 @@ function apiFetch(path, options = {}) {
   return fetch(api + path, { ...options, headers });
 }
 let character = null;
+let labIcons = {}; // lab-assets/lab.json의 icons (없으면 ✓·반짝이만 쓴다)
 let chroma = null;
 let busy = false;
 let lastProgress = null; // { threadCount, cleared: number[] } — 단계 클리어 감지용
@@ -94,6 +95,14 @@ function celebrate(text) {
   setTimeout(() => !busy && setVideo("idle"), 2500);
 
   const box = $("sparkles");
+  if (labIcons.clear) {
+    const stamp = document.createElement("img");
+    stamp.className = "clear-stamp";
+    stamp.src = "lab-assets/" + labIcons.clear;
+    stamp.alt = "";
+    box.appendChild(stamp);
+    setTimeout(() => stamp.remove(), 2400);
+  }
   for (let i = 0; i < 14; i++) {
     const s = document.createElement("span");
     s.textContent = ["✦", "✧", "★", "✨"][i % 4];
@@ -352,7 +361,7 @@ function renderRoadmap(stages, threads) {
     .map((stage, i) => {
       const cleared = p.cleared[i];
       const cls = cleared ? "node cleared" : i === p.current_index ? "node current" : "node";
-      return `<div class="${cls}"><div class="dot">${cleared ? "✓" : i + 1}</div><div class="label">${stage.label}</div></div>`;
+      return `<div class="${cls}"><div class="dot">${cleared ? (labIcons.clear ? `<img class="stamp" src="lab-assets/${labIcons.clear}" alt="✓">` : "✓") : i + 1}</div><div class="label">${stage.label}</div></div>`;
     })
     .join("");
   const hint =
@@ -514,6 +523,7 @@ window.kisto.onNewSession(() => {
   api = cfg.api;
   token = cfg.token;
   character = cfg.character;
+  labIcons = ((await window.kisto.labAssets().catch(() => null)) || {}).icons || {};
   const crop = character.crop || { top: 0, bottom: 0 };
   document.documentElement.style.setProperty("--char-width", character.displayWidth + "px");
 

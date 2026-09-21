@@ -27,6 +27,17 @@ let assets = {};
 
 const esc = (s) =>
   String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+
+// UI 아이콘·연구원 초상 (lab.json의 icons / avatars). 등록돼 있지 않으면 원래 이모지·글자를 쓴다.
+function icon(key, fallback, cls = "") {
+  const file = assets.icons && assets.icons[key];
+  return file ? `<img class="ico ${cls}" src="lab-assets/${esc(file)}" alt="${esc(fallback)}">` : fallback;
+}
+function avatar(roleKey, fallback, cls = "") {
+  const file = assets.avatars && assets.avatars[roleKey];
+  return file ? `<img class="avatar ${cls}" src="lab-assets/${esc(file)}" alt="">` : fallback;
+}
+const starRow = (on, total) => icon("star_on", "★", "star").repeat(on) + icon("star_off", "☆", "star").repeat(total - on);
 const md = (text) => DOMPurify.sanitize(marked.parse(text || "", { breaks: true }));
 
 // 백엔드는 토큰이 있는 요청만 받는다 (backend/main.py의 guard 참고).
@@ -80,10 +91,9 @@ function renderTopbar() {
   pick.disabled = !overview.projects.length;
 
   const lv = overview.level;
-  const filled = "★".repeat(lv.into_level) + "☆".repeat(lv.per_level - lv.into_level);
   $("level").innerHTML =
-    `<span class="lv">Lv.${lv.level}</span><span>${esc(lv.title)}</span>` +
-    `<span class="stars" title="다음 레벨까지 별 ${lv.per_level - lv.into_level}개">★ ${lv.stars} · ${filled}</span>` +
+    `<span class="lv">${icon("level", "", "lv-badge")}Lv.${lv.level}</span><span>${esc(lv.title)}</span>` +
+    `<span class="stars" title="다음 레벨까지 별 ${lv.per_level - lv.into_level}개">${icon("star_on", "★", "star")} ${lv.stars} · ${starRow(lv.into_level, lv.per_level)}</span>` +
     `<span class="bar"><i style="width:${(lv.into_level / lv.per_level) * 100}%"></i></span>`;
 }
 
@@ -245,6 +255,16 @@ function applyAssets(counts) {
   });
 }
 
+// 장면의 퀘스트 표시(❗, 완주 🏆)와 안내 말풍선의 키스토 얼굴을 그림으로 바꾼다 (시작할 때 한 번)
+function applyStaticIcons() {
+  document.querySelectorAll(".quest").forEach((q) => {
+    const file = assets.icons && assets.icons[q.classList.contains("trophy") ? "clear" : "quest"];
+    if (file) q.replaceChildren(el("image", { href: "lab-assets/" + file, x: -24, y: -24, width: 48, height: 48 }));
+  });
+  const face = assets.avatars && assets.avatars.manager;
+  if (face) document.querySelector("#guide img").src = "lab-assets/" + face;
+}
+
 // 매니저 키스토의 안내: 지금 무엇을 하면 되는지 알려준다
 function renderGuide(project) {
   if (!project) {
@@ -253,13 +273,13 @@ function renderGuide(project) {
   }
   const p = project.progress;
   if (p.cleared_count === p.total) {
-    guide(`<b>${esc(project.topic)}</b> 초안까지 완주했어요! 🏆 <b>노트북</b>에서 연구노트로 내보낼 수 있어요.`);
+    guide(`<b>${esc(project.topic)}</b> 초안까지 완주했어요! ${icon("clear", "🏆", "inline")} <b>노트북</b>에서 연구노트로 내보낼 수 있어요.`);
     return;
   }
   const spot = STAGE_SPOT[p.current_index];
   guide(
     `다음 퀘스트는 <b>${esc(p.current_label)}</b> — ${esc(p.current_hint)}.` +
-      (spot ? ` ❗가 뜬 <b>${SPOT_NAME[spot]}</b>를 눌러 보세요.` : "")
+      (spot ? ` ${icon("quest", "❗", "inline")}가 뜬 <b>${SPOT_NAME[spot]}</b>를 눌러 보세요.` : "")
   );
 }
 
@@ -282,7 +302,7 @@ function roleCard(key, extra = "") {
   const work = overview.work[key] ?? 0;
   const model = r.provider ? providerLabel(r.provider) : "자동 배치";
   return `<div class="role-card">
-      <div class="emoji">${r.emoji}</div>
+      <div class="emoji">${avatar(key, r.emoji)}</div>
       <div>
         <div class="name">${esc(r.name)}</div>
         <div class="duty">${esc(r.duty)}</div>
@@ -296,7 +316,7 @@ function track(progress, stages) {
     .map((s, i) => {
       const done = progress.cleared[i];
       const cls = done ? "node cleared" : i === progress.current_index ? "node current" : "node";
-      return `<div class="${cls}"><div class="dot">${done ? "✓" : i + 1}</div>${esc(s.label)}</div>`;
+      return `<div class="${cls}"><div class="dot">${done ? icon("clear", "✓", "stamp") : i + 1}</div>${esc(s.label)}</div>`;
     })
     .join("")}</div>`;
 }
@@ -306,8 +326,8 @@ const VIEWS = {
     const lv = overview.level;
     let html = `<h2>📋 퀘스트 보드</h2>
       <div class="level-card">
-        <div class="big">Lv.${lv.level} ${esc(lv.title)}</div>
-        <div class="stars">${"★".repeat(lv.into_level)}${"☆".repeat(lv.per_level - lv.into_level)}</div>
+        <div class="big">${icon("level", "", "lv-badge lg")}Lv.${lv.level} ${esc(lv.title)}</div>
+        <div class="stars">${starRow(lv.into_level, lv.per_level)}</div>
         <div class="sub">프로젝트에서 단계를 하나 클리어할 때마다 별 1개 · 지금까지 별 ${lv.stars}개</div>
       </div>`;
     if (!overview.projects.length) {
@@ -403,7 +423,7 @@ const VIEWS = {
       roles.providers.map((p) => `<option value="${esc(p.key)}" ${p.key === current ? "selected" : ""}>${esc(p.label)}</option>`).join("");
     for (const r of roles.roles) {
       html += `<div class="role-form" data-role="${r.key}">
-          <div class="head"><span style="font-size:22px">${r.emoji}</span>${esc(r.name)} <span class="sub">· ${esc(r.place)} · 누적 업무 ${overview.work[r.key] ?? 0}건</span></div>
+          <div class="head"><span class="head-av">${avatar(r.key, r.emoji, "sm")}</span>${esc(r.name)} <span class="sub">· ${esc(r.place)} · 누적 업무 ${overview.work[r.key] ?? 0}건</span></div>
           <div class="sub">${esc(r.duty)}</div>
           <label>담당 모델<select>${options(r.provider)}</select></label>
           <label>이 연구원에게 주는 지침 (선택)<textarea placeholder="예: 효과 크기와 신뢰구간을 항상 같이 보고해 줘">${esc(r.instructions || "")}</textarea></label>
@@ -480,6 +500,7 @@ $("project").addEventListener("change", (e) => selectProject(Number(e.target.val
   api = cfg.api;
   token = cfg.token;
   assets = (await window.kisto.labAssets()) || {};
+  applyStaticIcons();
   sessionId = await window.kisto.getSession();
   window.kisto.onSessionChanged((id) => {
     sessionId = id;

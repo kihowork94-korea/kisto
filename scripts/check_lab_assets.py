@@ -78,6 +78,13 @@ def main() -> int:
                 used += 1
                 check(f"{key}.{field}", spot[field], ratio, True, problems)
 
+    # UI 아이콘(256 정사각)과 연구원 초상(512 정사각) — 없어도 된다(이모지로 대신 그린다)
+    for section in ("icons", "avatars"):
+        for key, filename in (conf.get(section) or {}).items():
+            if filename:
+                used += 1
+                check(f"{section}.{key}", filename, 1.0, True, problems)
+
     if used == 0:
         print("lab.json에 등록된 이미지가 없다 — 지금은 코드가 그리는 벡터 그림을 쓴다.")
         print("에셋을 만들었다면 widget/lab-assets/prompts/lab.example.json 을 참고해 등록할 것.")
