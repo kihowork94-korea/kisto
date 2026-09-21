@@ -123,11 +123,46 @@ function toggleVisible() {
   else win.showInactive();
 }
 
+// 백엔드에 저장된 연구 목록 (트레이의 '저장된 연구 불러오기'). 트레이 아이콘에 마우스를 올리거나
+// 30초마다 새로 받아 둔다 — 메뉴는 열리는 순간 그려져서, 열 때 받으면 한 박자 늦기 때문이다.
+let savedSessions = [];
+let sessionsFetchedAt = 0;
+async function refreshSessions() {
+  sessionsFetchedAt = Date.now();
+  try {
+    const res = await fetch(API + "/sessions", { headers: { "X-Kisto-Token": readToken() } });
+    if (res.ok) savedSessions = (await res.json()).sessions || [];
+  } catch {
+    /* 백엔드가 꺼져 있으면 목록 없이 둔다 */
+  }
+  if (tray) buildTrayMenu();
+}
+
+function sessionMenuItems() {
+  if (!savedSessions.length) return [{ label: "저장된 연구가 없어요", enabled: false }];
+  return savedSessions.slice(0, 10).map((s) => {
+    const when = (s.updated || "").slice(5, 16).replace("T", " ");
+    const topic = s.topic.length > 26 ? s.topic.slice(0, 26) + "…" : s.topic;
+    const auto = s.session_id.startsWith("e2e-") ? " · 자동 시연" : "";
+    return {
+      label: `${topic}  (${s.progress.cleared_count}/${s.progress.total}단계 · ${when}${auto})`,
+      type: "radio",
+      checked: s.session_id === sessionId,
+      click: () => {
+        if (!win) return;
+        win.webContents.send("kisto:load-session", s.session_id);
+        win.showInactive();
+      },
+    };
+  });
+}
+
 function buildTrayMenu() {
   tray.setContextMenu(
     Menu.buildFromTemplate([
       { label: "보이기 / 숨기기  (Ctrl+Shift+K)", click: toggleVisible },
       { label: "🏠 연구실 열기", click: openLab },
+      { label: "📂 저장된 연구 불러오기", submenu: sessionMenuItems() },
       {
         label: "발표 모드 (에이전트 협업 과정 보기)",
         type: "checkbox",
@@ -160,6 +195,9 @@ function createTray() {
   tray.setToolTip("키스토");
   buildTrayMenu();
   tray.on("click", toggleVisible);
+  tray.on("mouse-move", () => Date.now() - sessionsFetchedAt > 3000 && refreshSessions());
+  refreshSessions();
+  setInterval(refreshSessions, 30000);
 }
 
 // 백엔드가 처음 뜰 때 만드는 토큰. 이게 있어야 백엔드가 위젯의 요청으로 인정한다
@@ -193,6 +231,7 @@ ipcMain.handle("kisto:lab-assets", () => {
 ipcMain.on("kisto:set-session", (_event, id) => {
   sessionId = id;
   if (labWin) labWin.webContents.send("kisto:session-changed", id);
+  refreshSessions(); // 메뉴의 '지금 보는 연구' 표시를 맞춘다
 });
 ipcMain.handle("kisto:get-session", () => sessionId);
 

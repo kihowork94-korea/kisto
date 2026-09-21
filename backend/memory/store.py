@@ -68,6 +68,9 @@ def update_current_thread(session_id: str, **fields) -> None:
 
 MAX_TURNS = 12
 TURN_CHARS = 1200
+# 위젯 대화창에 다시 띄우기 위한 전체 대화 기록 (turns는 모델에 넘길 맥락이라 짧게 자른다)
+MAX_CHAT = 200
+CHAT_CHARS = 20000
 
 
 def add_turn(
@@ -77,8 +80,9 @@ def add_turn(
     module: str | None = None,
     seconds: float | None = None,
     trace: list[dict] | None = None,
+    review: str | None = None,
 ) -> None:
-    """최근 대화(맥락용)와, 대시보드용 전체 활동 기록(누가·언제·몇 초)을 남긴다."""
+    """최근 대화(맥락용), 위젯에 다시 띄울 전체 대화, 대시보드용 활동 기록(누가·언제·몇 초)을 남긴다."""
     session = get_session(session_id)
     if not session["threads"]:
         return
@@ -86,6 +90,17 @@ def add_turn(
     turns = thread.setdefault("turns", [])
     turns.append({"user": user_message[:TURN_CHARS], "kisto": reply[:TURN_CHARS]})
     del turns[:-MAX_TURNS]
+    # 저장된 연구를 불러올 때 대화창을 그대로 복원한다 (검토 노트·협업 과정 포함)
+    chat = thread.setdefault("chat", [])
+    chat.append({
+        "at": datetime.now().isoformat(timespec="seconds"),
+        "user": user_message[:CHAT_CHARS],
+        "kisto": reply[:CHAT_CHARS],
+        "review": (review or None) and review[:CHAT_CHARS],
+        "trace": trace or [],
+        "seconds": seconds,
+    })
+    del chat[:-MAX_CHAT]
     # 대시보드용 활동 기록은 잘라내지 않는다 (본문 없이 요약만 남겨 가볍게 유지).
     thread.setdefault("activity", []).append(
         {
@@ -211,3 +226,45 @@ def list_threads(session_id: str) -> list[dict]:
         }
         for thread in session["threads"]
     ]
+
+
+def list_sessions() -> list[dict]:
+    """저장된 연구 목록 (위젯의 '저장된 연구 불러오기'). 최근에 활동한 것부터."""
+    items = []
+    for session_id, session in _load().items():
+        threads = session.get("threads") or []
+        if not threads:
+            continue
+        last = threads[-1]
+        times = [a.get("at") for t in threads for a in t.get("activity", []) if a.get("at")]
+        items.append({
+            "session_id": session_id,
+            "topic": last.get("topic", "(제목 없음)"),
+            "projects": len(threads),
+            "turns": sum(len(t.get("activity", [])) for t in threads),
+            "updated": max(times) if times else last.get("created_at"),
+            "progress": thread_progress(last),
+        })
+    items.sort(key=lambda s: s["updated"] or "", reverse=True)
+    return items
+
+
+def session_chat(session_id: str) -> list[dict]:
+    """세션의 대화를 위젯 대화창 형식({role, text, review, trace, seconds})으로 돌려준다.
+
+    전체 기록(chat)이 없는 예전 세션은 맥락용 요약(turns)으로 대신한다 — 답변이 1200자에서 잘려 있다.
+    """
+    messages = []
+    for thread in get_session(session_id).get("threads", []):
+        if thread.get("chat"):
+            for c in thread["chat"]:
+                messages.append({"role": "user", "text": c["user"]})
+                messages.append({"role": "kisto", "text": c["kisto"], "review": c.get("review"),
+                                 "trace": c.get("trace") or None, "seconds": c.get("seconds")})
+        else:
+            for c in thread.get("turns", []):
+                messages.append({"role": "user", "text": c["user"]})
+                cut = len(c["kisto"]) >= TURN_CHARS
+                note = "…\n\n(예전 기록이라 답변 앞부분만 남아 있어요)" if cut else ""
+                messages.append({"role": "kisto", "text": c["kisto"] + note})
+    return messages

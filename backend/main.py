@@ -24,9 +24,11 @@ from memory.store import (
     add_turn,
     current_thread,
     get_session,
+    list_sessions,
     list_threads,
     record_verification,
     save_session,
+    session_chat,
     start_new_thread,
     thread_brief,
     thread_progress,
@@ -99,6 +101,18 @@ class UploadRequest(BaseModel):
 def health():
     # unavailable: 키는 있지만 호출이 영구 실패해서(모델 없음·크레딧 없음 등) 건너뛰는 provider와 이유
     return {"providers": available_providers(), "unavailable": UNAVAILABLE}
+
+
+@app.get("/sessions")
+def sessions():
+    """저장된 연구 목록 — 위젯 트레이의 '저장된 연구 불러오기'."""
+    return {"sessions": list_sessions()}
+
+
+@app.get("/sessions/{session_id}/chat")
+def chat_history(session_id: str):
+    """세션을 불러올 때 대화창을 복원하는 데 쓴다."""
+    return {"messages": session_chat(session_id)}
 
 
 @app.get("/threads/{session_id}")
@@ -258,7 +272,7 @@ def _chat(req: ChatRequest):
 
     def respond(reply: str, review: str | None, verified_by: str | None) -> dict:
         seconds = round(time.perf_counter() - started, 1)
-        add_turn(req.session_id, message, reply, module=module, seconds=seconds, trace=trace)
+        add_turn(req.session_id, message, reply, module=module, seconds=seconds, trace=trace, review=review)
         return {
             "reply": reply,
             # 교차검증 결과는 답변에 섞지 않고 '검토 노트'로 따로 보여준다.

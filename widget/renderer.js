@@ -515,6 +515,33 @@ window.kisto.onNewSession(() => {
   openPanel();
 });
 
+// 트레이의 '저장된 연구 불러오기' — 그 세션으로 바꾸고 대화창을 백엔드 기록으로 복원한다.
+// 로드맵·연구실·대시보드는 세션 ID를 따라가므로 같이 바뀐다.
+window.kisto.onLoadSession(async (id) => {
+  if (busy) {
+    showThought("답을 기다리는 중이라 지금은 바꿀 수 없어요");
+    setTimeout(hideThought, 4000);
+    return;
+  }
+  let messages = [];
+  try {
+    messages = (await (await apiFetch(`/sessions/${encodeURIComponent(id)}/chat`)).json()).messages || [];
+  } catch {
+    showThought("저장된 연구를 불러오지 못했어요. 키스토 서버가 켜져 있는지 확인해 주세요");
+    setTimeout(hideThought, 6000);
+    return;
+  }
+  sessionId = id;
+  window.kisto.setSession(sessionId);
+  history = messages.slice(-30);
+  saveStore({ sessionId, history });
+  log.innerHTML = "";
+  for (const m of history) addMessage(m.role, m.text, { ...m, persist: false });
+  lastProgress = null; // 불러온 기록을 '방금 클리어'로 착각해 축하 연출을 띄우지 않게
+  await refreshRoadmap();
+  openPanel();
+});
+
 (async function init() {
   window.kisto.setSession(sessionId);
   setPresenter(!!store.presenter);
