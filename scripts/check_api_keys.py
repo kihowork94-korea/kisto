@@ -25,7 +25,7 @@ load_dotenv(ROOT / ".env")
 
 PROMPT = "Reply with the single word OK."
 # 어댑터(backend/adapters)의 기본값과 같아야 한다
-DEFAULT = {"openai": "gpt-5.1-codex", "gemini": "gemini-3.8-flash"}
+DEFAULT = {"openai": "gpt-5.3-codex", "gemini": "gemini-3.8-flash"}
 
 
 def masked(key: str) -> str:
@@ -131,7 +131,10 @@ def check_gemini() -> bool:
     print(f"   테스트 호출: {model} …")
     try:
         r = client.models.generate_content(
-            model=model, contents="ping", config=types.GenerateContentConfig(system_instruction=PROMPT)
+            model=model, contents="ping", config=types.GenerateContentConfig(
+                system_instruction=PROMPT,
+                automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True),
+            ),
         )
         print(f"   ✓ 성공 — 답: {(r.text or '').strip()[:40]!r}")
         return True
