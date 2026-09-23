@@ -17,6 +17,54 @@
 
 심사배점: 창의성 40 / 업무활용성 30 / 확산가능성 30.
 
+## 1-2. 새 PC에서 이어받기 (클로드에게 맡길 때)
+
+저장소는 **공개**다: `https://github.com/kihowork94-korea/kisto` (기본 브랜치 `main`에 최신 내용).
+소스·연구실 이미지 에셋·캐릭터 영상·신청서 hwpx·실측 기록이 전부 들어 있다.
+
+**① 받기**
+
+```bat
+git clone https://github.com/kihowork94-korea/kisto
+cd kisto
+```
+
+**② 없으면 설치할 것** — Python 3.12+ / Node.js 20+ / (선택) 로그인된 Claude Code CLI, 한글(hwpx 확인용)
+
+```bat
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
+cd widget && npm install && cd ..
+```
+
+**③ git으로 따라오지 않는 것 2개 — 직접 챙긴다**
+
+| 파일 | 왜 필요한가 | 구하는 법 |
+|---|---|---|
+| `.env` | API 키 (커밋 금지) | `.env.example` 복사 후 키 입력. 확인: `.venv\Scripts\python.exe scripts\check_api_keys.py` |
+| `data/memory_store.json` | 데모 연구 기록 — 없으면 신청서·발표용 화면을 다시 못 띄운다 | 기존 PC에서 USB로 복사 (10MB 미만, 개인정보 없음) |
+
+없어도 서버는 뜬다. 키가 하나도 없으면 로그인된 Claude Code CLI(하네스)로 돌아가고, 기록이 없으면
+빈 연구실로 시작한다 (`scripts/e2e.py`로 새로 만들 수 있다).
+
+**④ 켜고 확인**
+
+```bat
+run.cmd -Chat -Lab
+```
+
+`http://127.0.0.1:8420/health` 가 provider 목록을 돌려주면 정상. 위젯 대화창의 **📂 지난 연구**에서
+데모 세션(`e2e-2026...`)을 불러오면 대화·로드맵·연구실·대시보드가 그대로 복원된다.
+
+**⑤ 클로드에게 넘길 때 첫 메시지**
+
+> 이 폴더는 KIST AIX 공모전 출품작 '키스토'다. `CLAUDE.md`와 이 `HANDOFF.md`를 먼저 읽고,
+> 지금 상태와 남은 일을 정리해 줘. (Codex라면 `AGENTS.md`)
+
+클로드가 알아야 할 맥락은 전부 저장소 안에 있다 — 설계 결정은 `CLAUDE.md`, 실측 결과는
+`docs/results_2026-09-21.md`, 신청서는 `docs/KISTO_AIX_신청서.hwpx`(생성: `scripts/build_application_hwpx.py`).
+커밋 메시지에 "왜 그렇게 고쳤는지"가 남아 있으니 `git log`도 맥락이다.
+
 ## 2. 지금 바로 실행하기
 
 ```bat

@@ -49,7 +49,7 @@ GENERAL = [
     ("참여 인원", "[[ 명 ]]"),
     ("개발 기간", "[[ 2026.  ~ 2026.10 ]] (현재 동작하는 프로토타입 완성)"),
     ("활용 AI", "Claude(Anthropic) · GPT(OpenAI) · Gemini(Google) 멀티 모델 구조, PubMed·OpenAlex 문헌 검색"),
-    ("첨부자료", "GitHub 저장소 [[ 링크 ]] · 시연영상 [[ 링크 ]]"),
+    ("첨부자료", "GitHub 저장소 github.com/kihowork94-korea/kisto (공개) · 시연영상 [[ 링크 ]]"),
 ]
 
 SUMMARY = [
@@ -260,7 +260,8 @@ BODY = [
     ("d", "KIST 사내 시스템 연동, 연구실 단위 공유 메모리, 컨테이너 기반 분석 격리 강화"),
     ("gap",),
     ("box", "5. 첨부자료", "(Appendix)"),
-    ("b", "GitHub 저장소: [[ 링크 ]]"),
+    ("b", "GitHub 저장소: https://github.com/kihowork94-korea/kisto (공개)"),
+    ("d", "백엔드·위젯·연구실 전체 소스, 연구실 이미지 에셋, 신청서 생성 스크립트, 실측 결과 기록 포함"),
     ("b", "시연영상: [[ 링크 ]] — 위젯 대화 → 연구실 → 대시보드 → 연구노트 내보내기 (약 3분 30초)"),
 ]
 
@@ -503,7 +504,7 @@ def build(template: Path, output: Path) -> None:
     preview_text = "\r\n".join([TITLE, NOTE] + [f"{k}: {re.sub(r'[\\[\\]]', '', v)}" for k, v in GENERAL])
 
     # 미리보기 그림은 연구실 화면으로 대신한다 (한글에서 저장하면 첫 쪽 모양으로 다시 만들어진다).
-    thumb = (IMAGES / "lab_room.png").read_bytes()
+    thumb = (IMAGES / "ui_lab_overview.png").read_bytes()
 
     output.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as z:
