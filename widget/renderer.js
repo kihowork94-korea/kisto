@@ -351,7 +351,9 @@ window.kisto.onOpenChat(() => {
 function renderRoadmap(stages, threads) {
   const box = $("roadmap");
   if (!threads.length) {
-    box.innerHTML = '<div id="roadmap-empty">아직 시작한 연구 주제가 없어요. 관심 분야를 말해 주세요.</div>';
+    box.innerHTML =
+      '<div id="roadmap-empty">아직 시작한 연구 주제가 없어요. 관심 분야를 말해 주세요.<br>' +
+      '전에 하던 연구는 <b>📂 지난 연구</b>에서 불러올 수 있어요.</div>';
     box.append(roadmapActions(null));
     return;
   }
@@ -398,7 +400,12 @@ function roadmapActions(lastIndex) {
   home.textContent = "🏠 연구실";
   home.title = "연구원들이 일하는 연구실 보기";
   home.onclick = () => window.kisto.openLab();
-  actions.append(home);
+  const past = document.createElement("button");
+  past.className = "note-btn";
+  past.textContent = "📂 지난 연구";
+  past.title = "저장된 연구를 불러와 이어서 보기";
+  past.onclick = () => togglePastList(actions);
+  actions.append(past, home);
   if (lastIndex !== null) {
     const noteButton = document.createElement("button");
     noteButton.className = "note-btn";
@@ -407,6 +414,44 @@ function roadmapActions(lastIndex) {
     actions.append(noteButton);
   }
   return actions;
+}
+
+// '지난 연구' 목록 — 백엔드에 저장된 다른 연구 세션을 골라 불러온다 (트레이 메뉴와 같은 동작)
+async function togglePastList(actions) {
+  const open = document.querySelector(".session-list");
+  if (open) {
+    open.remove();
+    return;
+  }
+  const box = document.createElement("div");
+  box.className = "session-list";
+  box.textContent = "불러오는 중…";
+  actions.after(box);
+  let sessions = [];
+  try {
+    sessions = (await (await apiFetch("/sessions")).json()).sessions || [];
+  } catch {
+    box.textContent = "목록을 불러오지 못했어요. 키스토 서버가 켜져 있는지 확인해 주세요.";
+    return;
+  }
+  sessions = sessions.filter((s) => s.session_id !== sessionId);
+  if (!sessions.length) {
+    box.textContent = "저장된 다른 연구가 없어요.";
+    return;
+  }
+  box.textContent = "";
+  for (const s of sessions.slice(0, 12)) {
+    const item = document.createElement("button");
+    item.className = "session-item";
+    const when = (s.updated || "").slice(5, 16).replace("T", " ");
+    item.innerHTML = `<span class="topic"></span><span class="meta">${s.progress.cleared_count}/${s.progress.total}단계 · ${when}</span>`;
+    item.querySelector(".topic").textContent = s.topic; // 모델이 만든 문자열이라 텍스트로만
+    item.onclick = () => {
+      box.remove();
+      loadSession(s.session_id);
+    };
+    box.append(item);
+  }
 }
 
 async function exportNote(index) {
@@ -517,7 +562,9 @@ window.kisto.onNewSession(() => {
 
 // 트레이의 '저장된 연구 불러오기' — 그 세션으로 바꾸고 대화창을 백엔드 기록으로 복원한다.
 // 로드맵·연구실·대시보드는 세션 ID를 따라가므로 같이 바뀐다.
-window.kisto.onLoadSession(async (id) => {
+window.kisto.onLoadSession((id) => loadSession(id));
+
+async function loadSession(id) {
   if (busy) {
     showThought("답을 기다리는 중이라 지금은 바꿀 수 없어요");
     setTimeout(hideThought, 4000);
@@ -540,7 +587,7 @@ window.kisto.onLoadSession(async (id) => {
   lastProgress = null; // 불러온 기록을 '방금 클리어'로 착각해 축하 연출을 띄우지 않게
   await refreshRoadmap();
   openPanel();
-});
+}
 
 (async function init() {
   window.kisto.setSession(sessionId);

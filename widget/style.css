@@ -266,12 +266,28 @@ body.presenter #panel { box-shadow: 0 0 0 2px #6366f1, 0 10px 30px rgba(0, 0, 0,
 #attach:disabled { opacity: 0.5; cursor: default; }
 #panel.dropping { outline: 2px dashed var(--accent); outline-offset: -6px; }
 
-.quest-actions { display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px; }
+.quest-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; margin-top: 6px; }
 .note-btn {
+  white-space: nowrap; /* 버튼 안에서 줄이 갈라지지 않게 — 줄바꿈은 버튼 단위로 */
   border: 1px solid #ddd6fe; border-radius: 999px; background: #fff;
   color: var(--accent); font-size: 11px; font-weight: 700; padding: 3px 9px; cursor: pointer;
 }
 .note-btn:hover { background: var(--accent-soft); }
+
+/* '📂 지난 연구' 목록 — 저장된 다른 연구 세션 고르기 */
+.session-list {
+  margin-top: 6px; max-height: 190px; overflow-y: auto;
+  border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 11.5px;
+}
+.session-item {
+  display: flex; flex-direction: column; gap: 1px; width: 100%; text-align: left;
+  padding: 7px 9px; border: none; border-bottom: 1px solid var(--line);
+  background: none; font: inherit; cursor: pointer;
+}
+.session-item:last-child { border-bottom: none; }
+.session-item:hover { background: var(--accent-soft); }
+.session-item .topic { font-weight: 700; color: var(--ink); }
+.session-item .meta { color: var(--muted); font-size: 10.5px; }
 
 /* ── 캐릭터 위 버튼 막대 · 대화창 닫기 ─────── */
 #dock {
