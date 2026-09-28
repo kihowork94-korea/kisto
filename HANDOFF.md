@@ -1,6 +1,6 @@
 # 키스토(KISTO) 인수인계
 
-> 2026-09-18 작성 (Claude Code → 다음 작업자/Codex). 이 문서만 읽고 이어서 작업할 수 있게 쓴다.
+> 2026-09-18 작성, **2026-09-28 갱신** (Claude Code → 다음 작업자/Codex). 이 문서만 읽고 이어서 작업할 수 있게 쓴다.
 > 프로젝트의 원칙·결정 기록은 `CLAUDE.md`, 사용법은 `README.md`. 이 문서와 겹치는 부분은 이 문서가 요약이다.
 
 ## 1. 한 줄 요약과 마감
@@ -37,12 +37,13 @@ python -m venv .venv
 cd widget && npm install && cd ..
 ```
 
-**③ git으로 따라오지 않는 것 2개 — 직접 챙긴다**
+**③ git으로 따라오지 않는 것 3개 — 직접 챙긴다**
 
 | 파일 | 왜 필요한가 | 구하는 법 |
 |---|---|---|
 | `.env` | API 키 (커밋 금지) | `.env.example` 복사 후 키 입력. 확인: `.venv\Scripts\python.exe scripts\check_api_keys.py` |
 | `data/memory_store.json` | 데모 연구 기록 — 없으면 신청서·발표용 화면을 다시 못 띄운다 | 기존 PC에서 USB로 복사 (10MB 미만, 개인정보 없음) |
+| 신청서 서식 템플릿 `창업성공패키지_주식회사 프라이비_찐막.hwpx` | 신청서 hwpx를 **다시 만들 때만** 필요 (완성본을 여는 데는 불필요) | 기존 PC의 `Desktop\기타\후루룹\`에서 USB로 복사. 개인·회사 정보가 있어 저장소에 넣지 않는다 |
 
 없어도 서버는 뜬다. 키가 하나도 없으면 로그인된 Claude Code CLI(하네스)로 돌아가고, 기록이 없으면
 빈 연구실로 시작한다 (`scripts/e2e.py`로 새로 만들 수 있다).
@@ -87,18 +88,21 @@ run.cmd -BackendOnly
 
 | provider | 조건 | 지금 |
 |---|---|---|
-| `claude_harness` | 로그인된 Claude Code CLI가 PATH에 있음 (API 키 불필요, 사용자의 Claude Pro 한도를 씀) | **이것만 있음** |
-| `claude` | `.env`의 `ANTHROPIC_API_KEY` | 없음 |
-| `openai` | `.env`의 `OPENAI_API_KEY` | 없음 (사용자가 마지막에 넣기로 함) |
-| `gemini` | `.env`의 `GOOGLE_API_KEY` | 없음 (사용자가 마지막에 넣기로 함) |
+| `claude_harness` | 로그인된 Claude Code CLI가 PATH에 있음 (API 키 불필요, 사용자의 Claude Pro 한도를 씀) | 매니저·문헌·집필 담당 |
+| `claude` | `.env`의 `ANTHROPIC_API_KEY` | 선택 (없어도 하네스로 대체) |
+| `openai` | `.env`의 `OPENAI_API_KEY` | 분석 담당. 09-21 실제 호출 확인 |
+| `gemini` | `.env`의 `GOOGLE_API_KEY` | 검토 담당(무료 등급). 09-21 실제 호출 확인 |
+
+`.env`는 git에 없다 — PC를 옮기면 키를 다시 넣고 `scripts\check_api_keys.py`로 확인한다.
 
 - **Codex 환경에서 이어받는 경우**: Claude Code CLI가 없으면 `claude_harness`가 안 잡힌다. `.env`에 키를
   하나 이상 넣어야 서버가 뜬다 (`.env.example` 복사). 키는 커밋하지 않는다 (`.env`는 gitignore).
 - 하네스만 쓰면 답변 1회에 1~3분, Claude Pro **사용 한도에 실제로 걸린 적 있음** → 테스트를 동시에 여러 개
   돌리지 말 것. 한도에 걸리면 `/chat`이 503 + 이유를 돌려준다.
-- 모델 이름은 `.env`의 `ANTHROPIC_MODEL`/`OPENAI_MODEL`/`GEMINI_MODEL`로 바꾼다. 기본값
-  (`claude-opus-5`, `gpt-5.1-codex`, `gemini-2.5-pro`) 중 OpenAI·Gemini는 **실제 호출로 확인한 적 없음**
-  (키가 없어서 가짜 서버로 요청 형태만 검증). 키를 넣으면 제일 먼저 확인할 것.
+- 모델 이름은 `.env`의 `ANTHROPIC_MODEL`/`OPENAI_MODEL`/`GEMINI_MODEL`로 바꾼다. 기본값은
+  `claude-opus-5`, `gpt-5.3-codex`, `gemini-3.8-flash`(막히면 `gemini-3.5-flash` → `gemini-flash-latest`).
+  OpenAI·Gemini 기본값은 2026-09-21 실제 호출로 확인했다.
+- 호출 실패 시 자동 대체: 일시적 오류(503 등)는 4초·10초 뒤 재시도, 그 밖은 다음 후보로. 기록은 **실제로 답한 모델** 기준.
 
 ## 3. 코드 지도
 
@@ -122,7 +126,7 @@ widget/
   main.js preload.js 창·트레이·IPC. --chat/--lab 시작 옵션. 백엔드 토큰은 data/.kisto_token에서 읽음
   index.html renderer.js style.css chroma.js   투명 캐릭터 위젯 + 대화창 (WebGL 크로마키)
   lab.html lab.js lab.css   연구실 창(장면 + 서랍) + 📊 대시보드 탭
-  lab-assets/        연구실 이미지 에셋 자리 (lab.json + 규격 README). 지금은 벡터 그림
+  lab-assets/        연구실 이미지 에셋 (생성 이미지 적용 완료, 09-21). 위치·파일은 lab.json
     prompts/         에셋 생성 프롬프트 (00 스타일 → 01 배경 → 02~12 가구, 13~14 선택)
       plain/         한 파일 = 이미지 한 장, 복붙용 (도구 지시문은 HOW_TO_ORDER.md)
   character/         idle.mp4(캐릭터 영상, 워터마크는 crop으로 가림), icon.png/ico, character.json
@@ -132,13 +136,18 @@ scripts/
   build_application_hwpx.py   제출용 신청서 hwpx 생성 (내용은 파일 위쪽 GENERAL/SUMMARY/BODY)
   check_hwpx.ps1     한글 COM으로 hwpx 열기 + PDF 내보내기 (한글이 실제로 여는지 확인)
   ui_snapshot.js     연구실·대시보드 화면 캡처 (Electron)
+  render_diagrams.py 구조도·모식도 PNG 생성 (--doc: 기술 문서 PDF까지). 헤드리스 Edge/Chrome 사용
+  check_api_keys.py  .env 키로 OpenAI·Gemini 실제 호출 점검
 docs/
-  KISTO_AIX_신청서.hwpx   제출용 신청서 (7쪽, 붉은 [ ] 칸 미작성)
+  KISTO_AIX_신청서.hwpx   제출용 신청서 (20쪽, 그림 23장, 붉은 [ ] 칸 미작성)
+  KISTO_기술문서.pdf      기술 문서 12쪽 (원본 tech_doc.html) — 구조도 + 알고리즘 6종 + 실측 + 한계
+  results_2026-09-21.md   3사 모델 실증 기록 (신청서·발표 수치의 근거)
   application_draft.md    신청서 마크다운 초안
   demo_scenario.md        시연영상 대본 + 리허설 기록
   judging_review.md       심사위원 관점 약점·대응·예상 Q&A
   demo_rppg.csv           시연용 가상 데이터
-  images/                 신청서에 넣은 실제 실행 화면
+  images/                 신청서 그림: ui_*·result_*(실행 화면), chart_*(실측 차트, 원본 charts_source.html),
+                          diagram_*(구조도·모식도 13장, 원본 diagrams_source.html)
 KISTO.md             키스토 지침 (연구 분야: 신생아·영유아 비침습 연구)
 run.cmd / run.ps1    실행기 (-BackendOnly / -Lab / -Chat)
 ```
@@ -161,7 +170,7 @@ run.cmd / run.ps1    실행기 (-BackendOnly / -Lab / -Chat)
 7. 사용자가 준 사업계획서(`Desktop\창업성공패키지_...hwpx`)는 서식 참고용. 개인·회사 정보가 있으니 **저장소에 넣지 않는다**
 8. 친구가 만든 Unity 빌드(`Desktop\AIWAIFU_OUTPUT`)에는 OpenAI 키가 박혀 있다. **저장소에 넣지 않는다** (영상만 꺼내 씀)
 
-## 5. 검증된 사실 (2026-09-18, Claude 하네스 단독)
+## 5. 검증된 사실
 
 | 항목 | 결과 | 근거 |
 |---|---|---|
@@ -169,28 +178,26 @@ run.cmd / run.ps1    실행기 (-BackendOnly / -Lab / -Chat)
 | 단계별 시간 | 주제 탐색 78초 / 분석 77초 / 해석 질문 13초 / 초안 130초 | 〃 |
 | 실제 논문 인용 | 초안까지 실제 논문(Villarroel 2019 등)만 인용, 참고문헌 코드 생성 | 〃 |
 | 검토위원 정량 평가 | 심어 둔 오류 **10/10 탐지**, 정상 결과 오탐 **0/2** (채점도 Claude, 사례가 쉬워 천장 효과) | `scripts/verifier_eval.py` |
-| 이종 모델 교차검증 | **아직 한 번도 안 돌려 봄** (provider가 Claude뿐) | — |
-| 신청서 hwpx | 한글 2022에서 열림, 7쪽 | `scripts/check_hwpx.ps1` |
+| 이종 모델 교차검증 (09-21) | Claude·GPT·Gemini 3사 연동, **검토 3/3 다른 회사**, 총 292초 | `docs/results_2026-09-21.md` |
+| 신청서 hwpx (09-23) | 한글에서 열림, 20쪽 | `scripts/check_hwpx.ps1` |
 | 보안 | 악성 Origin·위조 Host 403, 위젯(토큰) 200 | 실서버 확인 |
 
-## 6. 남은 일 (우선순위 순)
+## 6. 남은 일 (우선순위 순, 2026-09-28 기준)
 
-1. **API 키 넣고 이종 모델 실증** (사용자가 `.env`에 OpenAI·Gemini 키를 넣기로 함 — 키는 채팅으로 받지 말 것)
-   - `run.cmd -BackendOnly` 재시작 → `GET /health`에 openai·gemini가 보이는지
-   - OpenAI·Gemini 기본 모델 이름이 실제로 호출되는지 확인, 안 되면 `.env`의 `*_MODEL`로 교체
-   - `python scripts/e2e.py` → "이종검증" 열이 O인지, 대시보드 "다른 회사 모델 검토 비율"이 올라가는지
-   - `python scripts/verifier_eval.py --verifier gemini` / `--verifier openai` → 같은 회사 결과와 비교.
-     **사례가 쉬워 천장 효과**가 있으니 더 미묘한 오류 사례(교란 변수, 단위 착오, 자유도 오류 등)를 추가해야 차이가 보인다
-   - 결과를 신청서(`scripts/build_application_hwpx.py`의 3-2 표, 3-1 소요 시간)와 `docs/*`에 반영
-2. **신청서 붉은 칸 채우기** (사용자 입력 필요): 신청자·참여 인원·개발 기간, before 소요 시간, 링크.
-   `build_application_hwpx.py`의 `GENERAL`/`BODY`를 고치고 `--template <사업계획서 hwpx>`로 재생성 →
-   `scripts/check_hwpx.ps1`로 열리는지 확인. 원본 **공모전 신청서 양식 파일은 아직 못 받음** — 받으면 목차 맞추기
-3. **시연영상** — 대본 `docs/demo_scenario.md` (API 키 넣은 뒤, 발표 모드 켜고, 가상 데이터 명시)
-4. **연구실 이미지 에셋** — 사용자가 제작 중. 받으면 `widget/lab-assets/`에 넣고 `lab.json`만 수정 (규격은 그 폴더 README).
-   생성 프롬프트는 `widget/lab-assets/prompts/` (시키는 법은 `prompts/HOW_TO_ORDER.md`).
-   받은 그림은 `scripts\prep_lab_assets.py`로 다듬고 `scripts\check_lab_assets.py`로 점검한다 (pillow 필요)
-5. **GitHub 공개 여부 결정** — 신청서 첨부용. 공개 전 `docs/KISTO_AIX_신청서.hwpx`·스크린샷 포함 여부 확인
-6. 발표자료 (10-28용, 1단계 결과 뒤)
+끝난 것: 3사 모델 실증(09-21), 연구실 이미지 에셋 적용(09-21), 신청서 본문·그림(09-23), 구조도·모식도·기술 문서(09-23),
+GitHub 공개 저장소.
+
+1. **신청서 붉은 칸 채우기 — 마감 10-02(금)** (사용자 입력 필요): 신청자·참여 인원·개발 기간, before 소요 시간
+   (3-3 표, 지금은 가정치), 시연영상 링크. `build_application_hwpx.py`의 `GENERAL`/`BODY`를 고치고 재생성:
+   `--template "<창업성공패키지_...찐막.hwpx>"` (개인·회사 정보가 있어 저장소에 없음 — PC를 옮기면 USB로 가져온다.
+   이 파일로 만들면 기존 제출본과 똑같이 나오는 것을 확인했다) → `scripts/check_hwpx.ps1`로 열리는지 확인.
+   원본 **공모전 신청서 양식 파일은 아직 못 받음** — 받으면 목차 맞추기
+2. **첨부자료 결정**: 기술 문서 PDF를 첨부로 낼지 (신청서 GENERAL의 '첨부자료' 칸에 아직 없음)
+3. **시연영상** — 대본 `docs/demo_scenario.md` (발표 모드 켜고, 가상 데이터 명시). `data/memory_store.json`이 있어야
+   데모 세션을 다시 띄울 수 있다 (없으면 `scripts/e2e.py`로 새로 만든다)
+4. 검토위원 평가 보강 — 사례가 쉬워 천장 효과. 교란 변수·단위 착오·자유도 오류 같은 사례를 추가해 회사별 비교
+5. 발표자료 (10-28용, 1단계 결과 10-08 뒤). 재료: `docs/images/diagram_*` (보충 그림 journey·timeline·hardening·
+   catches·scaleup·position은 발표용으로 만든 것), `chart_*`, `docs/judging_review.md`의 예상 Q&A
 
 ## 7. 이번에 실제로 밟은 함정 (재발 방지)
 
@@ -221,7 +228,7 @@ powershell -ExecutionPolicy Bypass -File scripts\check_hwpx.ps1 docs\KISTO_AIX_�
 
 ## 9. Git
 
-- 작업 브랜치 `feat/research-lab` (main에 병합 전). 원격 푸시는 아직 안 함.
-- 커밋 작성자는 저장소 주인 계정 `kihowork94-korea <kihowork94@gmail.com>`로 해 왔다 (이 PC엔 git 사용자 설정이
-  없어서 커밋마다 `git -c user.name=... -c user.email=...`로 지정). 다른 계정으로 할지는 사용자에게 확인.
+- 기본 브랜치 `main`, 공개 저장소 `github.com/kihowork94-korea/kisto`에 푸시해 둔다 (`feat/research-lab`은 병합 끝난 옛 브랜치).
+- 커밋 작성자는 저장소 주인 계정 `kihowork94-korea <kihowork94@gmail.com>`. 새 PC에 git 사용자 설정이 없으면
+  `git -c user.name=... -c user.email=...`로 지정한다.
 - 커밋하지 않는 것: `.env`, `data/`의 메모리·로그·업로드·토큰·연구실 설정·스냅샷 (gitignore 참고).

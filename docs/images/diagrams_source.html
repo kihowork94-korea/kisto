@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<!-- 신청서·기술문서용 구조도와 알고리즘 모식도. scripts/render_diagrams.py가 그림마다 PNG로 저장한다.
+     내용은 backend/ 코드의 실제 동작 그대로다 (config.py, orchestrator/, modules/, literature.py, memory/store.py, lab.py).
+     그림 하나만 보려면 파일 뒤에 #fig-arch 처럼 id를 붙여 연다. -->
+<meta charset="utf-8" />
+<style>
+  body { margin: 0; background: #fff; font-family: "Pretendard", "Malgun Gothic", sans-serif; }
+  svg.fig { display: block; margin: 0 0 24px; }
+  .bg { fill: #fffdf8; }
+  .ttl { font-size: 18px; font-weight: 800; fill: #1f2937; }
+  .dsc { font-size: 12.5px; fill: #8a877f; }
+  .b { font-size: 13px; font-weight: 700; fill: #1f2937; }
+  .s { font-size: 11.5px; fill: #52514e; }
+  .xs { font-size: 10.5px; fill: #6b6860; }
+  .mut { font-size: 10.5px; fill: #9a968c; }
+  .lab { font-size: 10.5px; font-weight: 700; fill: #6b6860; }
+  .wb { font-size: 13px; font-weight: 700; fill: #fff; }
+  .ws { font-size: 11px; fill: #d6dbe3; }
+  .mono { font-family: Consolas, "D2Coding", "Malgun Gothic", monospace; font-size: 11px; fill: #e5e7eb; white-space: pre; }
+  .mono .k { fill: #93c5fd; } .mono .cm { fill: #9ca3af; } .mono .g { fill: #86efac; } .mono .o { fill: #fdba74; }
+  .c { text-anchor: middle; }
+  .code { fill: #fff; stroke: #c9c1b1; stroke-width: 1.2; }
+  .panel { fill: #f5efe3; stroke: #e6dece; stroke-width: 1; }
+  .an { fill: #e8f0fb; stroke: #2a78d6; stroke-width: 1.4; }
+  .oa { fill: #fdeee6; stroke: #eb6834; stroke-width: 1.4; }
+  .go { fill: #e3f5ee; stroke: #1baf7a; stroke-width: 1.4; }
+  .rv { fill: #eef1f5; stroke: #334155; stroke-width: 1.4; }
+  .dark { fill: #1f2937; }
+  .amb { fill: #fff4dc; stroke: #d99a1e; stroke-width: 1.4; }
+  .ln { stroke: #7d796f; stroke-width: 1.5; fill: none; marker-end: url(#ah); }
+  .lnb { stroke: #2a78d6; stroke-width: 1.5; fill: none; marker-end: url(#ahb); }
+  .dash { stroke: #a8a296; stroke-width: 1.2; fill: none; stroke-dasharray: 4 3; }
+  .cA { fill: #2a78d6; } .cO { fill: #eb6834; } .cG { fill: #1baf7a; }
+  .tA { fill: #1d5fae; font-weight: 700; } .tO { fill: #c4501f; font-weight: 700; } .tG { fill: #128a5f; font-weight: 700; }
+</style>
+
+<!-- 화살촉 정의 — 그림을 하나씩 숨겨도 보이도록 항상 보이는 곳에 둔다 -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#7d796f" /></marker>
+    <marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#2a78d6" /></marker>
+  </defs>
+</svg>
+
+<!-- ═════════ 그림 1. 전체 시스템 구성도 ═════════ -->
+<svg class="fig" id="fig-arch" width="900" height="664" viewBox="0 0 900 664">
+  <rect class="bg" width="900" height="664" />
+  <text class="ttl" x="20" y="34">키스토 전체 시스템 구성도 — '나만의 연구실'</text>
+  <text class="dsc" x="20" y="54">연구자는 캐릭터 한 명과 대화하고, 그 뒤에서 역할을 나눈 AI 연구원들이 3사 모델로 일한다</text>
+
+  <!-- 왼쪽: 사용자 계층 -->
+  <rect class="rv" x="16" y="80" width="160" height="78" rx="10" />
+  <circle cx="44" cy="112" r="9" fill="#334155" />
+  <path d="M30 140 Q44 118 58 140 Z" fill="#334155" />
+  <text class="b" x="68" y="115">연구 책임자 (PI)</text>
+  <text class="s" x="68" y="133">연구자 = 사용자</text>
+  <path class="ln" d="M96 158 V188" />
+  <rect class="code" x="16" y="190" width="160" height="84" rx="10" />
+  <text class="b c" x="96" y="213">바탕화면 위젯</text>
+  <text class="s c" x="96" y="232">캐릭터 · 대화창</text>
+  <text class="s c" x="96" y="248">5단계 연구 로드맵</text>
+  <text class="mut c" x="96" y="265">Electron · WebGL 투명 처리</text>
+  <rect class="code" x="16" y="300" width="160" height="84" rx="10" />
+  <text class="b c" x="96" y="323">연구실 창</text>
+  <text class="s c" x="96" y="342">자리별 기록 · 검토 보드</text>
+  <text class="s c" x="96" y="358">대시보드 · 조직도</text>
+  <text class="mut c" x="96" y="375">Electron</text>
+  <rect class="code" x="16" y="410" width="160" height="66" rx="10" />
+  <text class="b c" x="96" y="433">연구노트 내보내기</text>
+  <text class="xs c" x="96" y="452">주제별 기록을 문서로 정리</text>
+  <text class="mut c" x="96" y="467">문서\키스토 연구노트</text>
+  <rect class="code" x="16" y="496" width="160" height="66" rx="10" />
+  <text class="b c" x="96" y="519">로컬 접근 보호</text>
+  <text class="xs c" x="96" y="538">접근 토큰 · Origin · Host 검사</text>
+  <text class="mut c" x="96" y="553">다른 웹사이트의 호출 차단</text>
+
+  <!-- 가운데: 백엔드 -->
+  <rect class="panel" x="196" y="74" width="508" height="516" rx="14" />
+  <text class="b" x="212" y="96" style="fill:#334155">키스토 백엔드 · FastAPI (내 PC에서 실행)</text>
+  <rect class="code" x="212" y="110" width="120" height="56" rx="9" />
+  <text class="b c" x="272" y="133">개인정보 가림</text>
+  <text class="xs c" x="272" y="152">주민번호·전화·이메일</text>
+  <rect class="an" x="352" y="110" width="150" height="56" rx="9" />
+  <text class="b c" x="427" y="133">의도 라우터</text>
+  <text class="s c" x="427" y="152">연구실 매니저 키스토</text>
+  <rect class="code" x="522" y="110" width="166" height="56" rx="9" />
+  <text class="b c" x="605" y="133">연구 맥락 주입</text>
+  <text class="xs c" x="605" y="152">스레드 요약 (가설·분석·해석)</text>
+  <path class="ln" d="M332 138 H350" />
+  <path class="ln" d="M502 138 H520" />
+
+  <path class="ln" d="M605 166 V180 H634 V194" />
+  <path class="ln" d="M605 180 H268 V194" />
+  <path class="ln" d="M390 180 V194" />
+  <path class="ln" d="M512 180 V194" />
+  <rect class="an" x="212" y="196" width="112" height="86" rx="9" />
+  <text class="b c" x="268" y="219">문헌 연구원</text>
+  <text class="s c" x="268" y="237">서재</text>
+  <text class="xs c" x="268" y="255">논문 검색·가설 비교</text>
+  <text class="xs c tA" x="268" y="272">Claude</text>
+  <rect class="oa" x="334" y="196" width="112" height="86" rx="9" />
+  <text class="b c" x="390" y="219">분석 연구원</text>
+  <text class="s c" x="390" y="237">실험대</text>
+  <text class="xs c" x="390" y="255">코드 작성·실행·해석</text>
+  <text class="xs c tO" x="390" y="272">GPT</text>
+  <rect class="an" x="456" y="196" width="112" height="86" rx="9" />
+  <text class="b c" x="512" y="219">집필 연구원</text>
+  <text class="s c" x="512" y="237">노트북</text>
+  <text class="xs c" x="512" y="255">해석 먼저 묻고 초안</text>
+  <text class="xs c tA" x="512" y="272">Claude</text>
+  <rect class="an" x="578" y="196" width="112" height="86" rx="9" />
+  <text class="b c" x="634" y="219">일상 대화</text>
+  <text class="s c" x="634" y="237">키스토</text>
+  <text class="xs c" x="634" y="255">인사·기능 안내</text>
+  <text class="xs c tA" x="634" y="272">Claude</text>
+
+  <path d="M268 282 V298 M390 282 V298 M512 282 V298 M268 298 H578" stroke="#7d796f" stroke-width="1.5" fill="none" />
+  <path class="ln" d="M322 298 V314" />
+  <path class="ln" d="M578 298 V314" />
+  <rect class="an" x="212" y="316" width="220" height="62" rx="9" />
+  <text class="b c" x="322" y="339">페르소나 레이어</text>
+  <text class="s c" x="322" y="357">키스토 한 사람의 말투로 통일</text>
+  <text class="xs c tA" x="322" y="372">Claude</text>
+  <text class="lab c" x="450" y="352">∥ 병렬</text>
+  <rect class="rv" x="468" y="316" width="220" height="62" rx="9" />
+  <text class="b c" x="578" y="339">외부 검토위원 · 교차검증</text>
+  <text class="s c" x="578" y="357">결과를 만든 회사와 다른 회사 모델</text>
+  <circle class="cA" cx="546" cy="368" r="4" /><circle class="cO" cx="558" cy="368" r="4" /><circle class="cG" cx="570" cy="368" r="4" />
+  <text class="xs" x="580" y="372">중 자동 배정</text>
+
+  <path class="ln" d="M690 239 H697 V435 H690" />
+  <path class="ln" d="M322 378 V408" />
+  <path class="ln" d="M578 378 V408" />
+  <rect class="code" x="212" y="410" width="476" height="50" rx="9" />
+  <text class="b c" x="450" y="430">응답 조립</text>
+  <text class="s c" x="450" y="449">답변 + 검토 노트(접힘) + 참고문헌 목록(코드 생성) + 발표 모드 기록</text>
+
+  <path class="ln" d="M327 460 V488" />
+  <text class="lab" x="334" y="479">기록</text>
+  <rect class="code" x="212" y="490" width="230" height="86" rx="9" />
+  <text class="b c" x="327" y="512">연구 메모리</text>
+  <text class="s c" x="327" y="530">주제별 스레드 (JSON)</text>
+  <text class="xs c" x="327" y="547">가설 · 분석 · 검토 · 초안</text>
+  <text class="xs c" x="327" y="563">참고문헌 · 활동 기록</text>
+  <path class="ln" d="M442 533 H460" />
+  <rect class="code" x="462" y="490" width="226" height="86" rx="9" />
+  <text class="b c" x="575" y="512">실데이터 지표 계산</text>
+  <text class="s c" x="575" y="530">로드맵 5단계 판정</text>
+  <text class="xs c" x="575" y="547">연구실 레벨 · 자리별 기록 수</text>
+  <text class="xs c" x="575" y="563">대시보드 · 조직도</text>
+
+  <!-- 사용자 계층 ↔ 백엔드 -->
+  <path class="ln" d="M176 214 H186 V138 H210" />
+  <path class="lnb" d="M212 435 H182 V246 H178" />
+  <path class="lnb" d="M212 560 H190 V350 H178" />
+
+  <!-- 오른쪽: 외부 자원 -->
+  <rect class="dark" x="724" y="80" width="160" height="94" rx="10" />
+  <text class="wb c" x="804" y="104">모델 어댑터 계층</text>
+  <text class="ws c" x="804" y="124">역할별 모델 배정</text>
+  <text class="ws c" x="804" y="141">실패 시 재시도·자동 대체</text>
+  <text class="ws c" x="804" y="158">실제 응답한 모델 기록</text>
+  <rect class="an" x="724" y="184" width="160" height="46" rx="9" />
+  <text class="b c" x="804" y="203">Anthropic Claude</text>
+  <text class="xs c" x="804" y="220">API · Claude Code (정액)</text>
+  <rect class="oa" x="724" y="238" width="160" height="46" rx="9" />
+  <text class="b c" x="804" y="257">OpenAI GPT</text>
+  <text class="xs c" x="804" y="274">API (종량 과금)</text>
+  <rect class="go" x="724" y="292" width="160" height="46" rx="9" />
+  <text class="b c" x="804" y="311">Google Gemini</text>
+  <text class="xs c" x="804" y="328">API (무료 등급)</text>
+  <rect class="code" x="724" y="364" width="160" height="56" rx="9" />
+  <text class="b c" x="804" y="386">문헌 데이터베이스</text>
+  <text class="xs c" x="804" y="405">PubMed · OpenAlex</text>
+  <rect class="code" x="724" y="440" width="160" height="72" rx="9" />
+  <text class="b c" x="804" y="462">격리 실행 환경</text>
+  <text class="xs c" x="804" y="480">Python · numpy · scipy · pandas</text>
+  <text class="xs c" x="804" y="496">시간 제한 · 패키지 설치 차단</text>
+  <path class="ln" d="M704 160 H713 V127 H722" />
+  <path class="ln" d="M704 392 H722" />
+  <path class="ln" d="M704 476 H722" />
+  <text class="lab" x="712" y="600" style="fill:#9a968c">모델은 연구실 설정에서 역할별로 교체</text>
+
+  <!-- 범례 -->
+  <rect class="an" x="20" y="612" width="14" height="14" rx="3" /><text class="s" x="40" y="623">Anthropic 모델</text>
+  <rect class="oa" x="140" y="612" width="14" height="14" rx="3" /><text class="s" x="160" y="623">OpenAI 모델</text>
+  <rect class="go" x="250" y="612" width="14" height="14" rx="3" /><text class="s" x="270" y="623">Google 모델</text>
+  <rect class="rv" x="360" y="612" width="14" height="14" rx="3" /><text class="s" x="380" y="623">다른 회사 모델로 배정되는 역할</text>
+  <rect class="code" x="572" y="612" width="14" height="14" rx="3" /><text class="s" x="592" y="623">규칙 기반 코드 (LLM 없음)</text>
+  <path class="lnb" d="M760 619 H790" /><text class="s" x="796" y="623">화면으로</text>
+  <text class="mut" x="20" y="650">Google AI Co-Scientist · FutureHouse Kosmos의 멀티에이전트 연구 패턴을 참고해 자체 재구현 (해당 서비스의 API 연동이 아님)</text>
+</svg>
+
+<!-- ═════════ 그림 2. 의도 라우팅 ═════════ -->
+<svg class="fig" id="fig-route" width="900" height="592" viewBox="0 0 900 592">
+  <rect class="bg" width="900" height="592" />
+  <text class="ttl" x="20" y="34">알고리즘 1 · 의도 라우팅과 상태 기반 모듈 선택</text>
+  <text class="dsc" x="20" y="54">LLM은 의도만 분류하고, 어느 연구원에게 보낼지는 스레드에 저장된 연구 상태가 결정한다</text>
+
+  <rect class="rv" x="20" y="78" width="200" height="40" rx="9" />
+  <text class="b c" x="120" y="103">연구자 메시지</text>
+  <path class="ln" d="M120 118 V134" />
+  <rect class="code" x="20" y="136" width="200" height="48" rx="9" />
+  <text class="b c" x="120" y="156">개인정보 가림</text>
+  <text class="xs c" x="120" y="174">정규식 3종 → [항목 가림] 치환</text>
+  <path class="ln" d="M120 184 V198" />
+  <rect class="an" x="20" y="200" width="200" height="62" rx="9" />
+  <text class="b c" x="120" y="221">의도 분류 (LLM)</text>
+  <text class="xs c" x="120" y="239">입력: 메시지 + 진행 중인 주제</text>
+  <text class="xs c" x="120" y="254">출력: JSON 한 개만 허용</text>
+  <path class="ln" d="M120 262 V278" />
+  <rect class="dark" x="20" y="280" width="416" height="74" rx="9" />
+  <text class="mono" x="36" y="302">{ <tspan class="k">"intent"</tspan>: <tspan class="g">"topic_explore"</tspan>,</text>
+  <text class="mono" x="36" y="320">  <tspan class="k">"new_topic"</tspan>: <tspan class="g">"신생아 rPPG 심박 측정 정확도"</tspan>,</text>
+  <text class="mono" x="36" y="338">  <tspan class="k">"search_query"</tspan>: <tspan class="g">"neonatal rPPG heart rate ECG"</tspan> }</text>
+  <text class="xs" x="20" y="374">· 새 주제면 스레드를 새로 열고, 검색어는 문헌 연구원에게 그대로 전달</text>
+  <text class="xs" x="20" y="392">· JSON 해석에 실패하면 가장 안전한 topic_explore로 처리 (대화가 끊기지 않음)</text>
+
+  <!-- 오른쪽: 선택 규칙 -->
+  <text class="b" x="470" y="90">모듈 선택 규칙</text>
+  <path d="M436 300 H452 V124 M452 172 H468 M452 124 H468 M452 220 H468 M452 268 H468 M452 300 V316 H468" stroke="#7d796f" stroke-width="1.5" fill="none" />
+  <g>
+    <rect class="code" x="470" y="104" width="150" height="40" rx="20" /><text class="s c" x="545" y="128">chitchat 잡담</text>
+    <path class="ln" d="M620 124 H658" />
+    <rect class="an" x="660" y="104" width="220" height="40" rx="9" /><text class="b c" x="770" y="129">일상 대화 (키스토)</text>
+    <rect class="code" x="470" y="152" width="150" height="40" rx="20" /><text class="s c" x="545" y="176">topic_explore 주제</text>
+    <path class="ln" d="M620 172 H658" />
+    <rect class="an" x="660" y="152" width="220" height="40" rx="9" /><text class="b c" x="770" y="169">문헌 연구원</text><text class="xs c" x="770" y="185">+ 영어 검색어로 실제 논문 검색</text>
+    <rect class="code" x="470" y="200" width="150" height="40" rx="20" /><text class="s c" x="545" y="224">data_analysis 분석</text>
+    <path class="ln" d="M620 220 H658" />
+    <rect class="oa" x="660" y="200" width="220" height="40" rx="9" /><text class="b c" x="770" y="225">분석 연구원</text>
+    <rect class="code" x="470" y="248" width="150" height="40" rx="20" /><text class="s c" x="545" y="272">writing 집필</text>
+    <path class="ln" d="M620 268 H658" />
+    <rect class="an" x="660" y="248" width="220" height="40" rx="9" /><text class="b c" x="770" y="273">집필 연구원</text>
+    <rect class="amb" x="470" y="296" width="150" height="40" rx="20" /><text class="s c" x="545" y="320">continue "이어서"</text>
+    <path class="ln" d="M620 316 H658" />
+    <rect class="amb" x="660" y="296" width="220" height="130" rx="9" />
+    <text class="b" x="676" y="318">스레드 상태 규칙 (위에서부터)</text>
+    <text class="xs" x="676" y="340">1. 초안 있음 ∨ 해석 대기 중 → 집필</text>
+    <text class="xs" x="676" y="360">2. 가설 있음 ∧ 분석 없음 → 분석</text>
+    <text class="xs" x="676" y="380">3. 분석 있음 → 집필</text>
+    <text class="xs" x="676" y="400">4. 그 밖 → 문헌</text>
+    <text class="mut" x="676" y="418">스레드가 없으면 topic_explore로 처리</text>
+  </g>
+
+  <!-- 아래: 요청 1건의 처리 순서 -->
+  <rect class="panel" x="20" y="446" width="860" height="132" rx="12" />
+  <text class="b" x="36" y="470">요청 1건의 처리 순서</text>
+  <rect class="code" x="36" y="486" width="84" height="44" rx="8" /><text class="s c" x="78" y="512">가림</text>
+  <path class="ln" d="M120 508 H136" />
+  <rect class="an" x="138" y="486" width="96" height="44" rx="8" /><text class="s c" x="186" y="512">의도 라우터</text>
+  <path class="ln" d="M234 508 H250" />
+  <rect class="code" x="252" y="486" width="100" height="44" rx="8" /><text class="s c" x="302" y="512">맥락 주입</text>
+  <path class="ln" d="M352 508 H368" />
+  <rect class="an" x="370" y="486" width="118" height="44" rx="8" /><text class="s c" x="429" y="505">연구원 모듈</text><text class="mut c" x="429" y="521">검색·코드 실행 포함</text>
+  <path d="M488 508 H497 V493 M497 508 V523" stroke="#7d796f" stroke-width="1.5" fill="none" />
+  <path class="ln" d="M497 493 H508" /><path class="ln" d="M497 523 H508" />
+  <rect class="an" x="510" y="481" width="150" height="24" rx="6" /><text class="xs c" x="585" y="497">페르소나 (말투 다듬기)</text>
+  <rect class="rv" x="510" y="511" width="150" height="24" rx="6" /><text class="xs c" x="585" y="527">교차검증 (다른 회사)</text>
+  <path d="M660 493 H669 V523 H660 M669 508 H676" stroke="#7d796f" stroke-width="1.5" fill="none" />
+  <path class="ln" d="M676 508 H690" />
+  <rect class="code" x="692" y="486" width="172" height="44" rx="8" /><text class="s c" x="778" y="505">응답 · 기록 저장</text><text class="mut c" x="778" y="521">로드맵·연구실 즉시 갱신</text>
+  <text class="xs" x="36" y="560">두 단계는 서로 독립이라 동시에 실행 — 주제 탐색 응답 107~145초 → 78초로 단축 (Claude Code 단독 구성 실측)</text>
+</svg>
+
+<!-- ═════════ 그림 3. 이종 모델 교차검증 ═════════ -->
+<svg class="fig" id="fig-verify" width="900" height="560" viewBox="0 0 900 560">
+  <rect class="bg" width="900" height="560" />
+  <text class="ttl" x="20" y="34">알고리즘 2 · 이종 모델 교차검증 배정과 자동 대체</text>
+  <text class="dsc" x="20" y="54">결과를 실제로 만든 모델의 회사를 빼고 검토위원을 고른다. 호출이 실패해도 검토는 건너뛰지 않는다</text>
+
+  <rect class="dark" x="20" y="74" width="424" height="268" rx="10" />
+  <text class="wb" x="36" y="98">검토위원 후보 순서</text>
+  <text class="mono" x="36" y="124"><tspan class="cm">입력</tspan>  p* = 결과를 실제로 만든 모델,  P = 사용 가능한 모델</text>
+  <text class="mono" x="36" y="146"><tspan class="k">vendor</tspan>(Claude API) = <tspan class="k">vendor</tspan>(Claude Code) = Anthropic</text>
+  <text class="mono" x="36" y="164"><tspan class="k">vendor</tspan>(GPT) = OpenAI,  <tspan class="k">vendor</tspan>(Gemini) = Google</text>
+  <text class="mono" x="36" y="192">L  ← 중복 제거( [사용자 지정] + [Gemini, GPT,</text>
+  <text class="mono" x="36" y="210">                Claude API, Claude Code] + P )</text>
+  <text class="mono" x="36" y="236">C₁ ← { p ∈ L | <tspan class="k">vendor</tspan>(p) ≠ <tspan class="k">vendor</tspan>(p*) }</text>
+  <text class="mono" x="36" y="252"><tspan class="g">     # 1순위: 다른 회사</tspan></text>
+  <text class="mono" x="36" y="274">C₂ ← { p ∈ L | <tspan class="k">vendor</tspan>(p) = <tspan class="k">vendor</tspan>(p*), p ≠ p* }</text>
+  <text class="mono" x="36" y="290"><tspan class="o">     # 2순위: 같은 회사 다른 모델 (기록에 표시)</tspan></text>
+  <text class="mono" x="36" y="312">C₃ ← { p* }  <tspan class="o"># 최후: 자기 검토 (기록에 표시)</tspan></text>
+  <text class="mono" x="36" y="332"><tspan class="k">return</tspan> Fallback( C₁ ⊕ C₂ ⊕ C₃ )</text>
+
+  <rect class="panel" x="462" y="74" width="418" height="268" rx="10" />
+  <text class="b" x="478" y="98">Fallback 실행 — 모든 LLM 호출에 공통</text>
+  <rect class="code" x="478" y="112" width="180" height="40" rx="8" /><text class="b c" x="568" y="137">후보 cᵢ 호출</text>
+  <path class="ln" d="M658 132 H686" /><text class="lab" x="662" y="125">성공</text>
+  <rect class="go" x="688" y="112" width="178" height="40" rx="8" /><text class="s c" x="777" y="130">응답 반환</text><text class="xs c" x="777" y="145">실제로 답한 모델을 기록</text>
+  <path class="ln" d="M543 152 V186" /><text class="lab" x="550" y="174">실패</text>
+  <rect class="code" x="478" y="188" width="130" height="44" rx="8" /><text class="b c" x="543" y="208">실패 원인</text><text class="xs c" x="543" y="224">예외 이름·메시지로 분류</text>
+  <path class="ln" d="M608 210 H617 V200 H630" />
+  <path class="ln" d="M617 210 V252 H630" />
+  <path class="ln" d="M617 252 V304 H630" />
+  <rect class="amb" x="632" y="178" width="234" height="44" rx="8" />
+  <text class="s" x="644" y="196">일시적: 503 · overloaded · high demand</text>
+  <text class="xs" x="644" y="212">4초·10초 대기 후 재시도 → 그래도 실패면 다음 후보</text>
+  <path class="ln" d="M700 178 V166 H618 V154" /><text class="lab" x="708" y="171">재시도</text>
+  <rect class="code" x="632" y="230" width="234" height="44" rx="8" />
+  <text class="s" x="644" y="248">그 밖: 한도 초과 · 모델 없음 · 키 오류</text>
+  <text class="xs" x="644" y="264">다음 후보 cᵢ₊₁로 (영구 오류는 재시작까지 제외)</text>
+  <rect class="code" x="632" y="282" width="234" height="44" rx="8" />
+  <text class="s" x="644" y="300">후보를 모두 소진</text>
+  <text class="xs" x="644" y="316">503 + 이유를 대화창에 표시 (서버 오류 없음)</text>
+
+  <text class="b" x="20" y="376">2026-09-21 실제 실행 기록 — 검토 3건 모두 다른 회사 모델이 수행</text>
+  <g>
+    <rect class="code" x="20" y="388" width="276" height="76" rx="10" />
+    <text class="s" x="34" y="408">① 주제 탐색 · 선행 연구 요약</text>
+    <rect class="an" x="34" y="420" width="92" height="30" rx="15" /><text class="s c tA" x="80" y="440">Claude</text>
+    <path class="ln" d="M130 435 H176" /><text class="mut c" x="153" y="428">검토</text>
+    <rect class="go" x="180" y="420" width="102" height="30" rx="15" /><text class="s c tG" x="231" y="440">Gemini</text>
+    <rect class="code" x="312" y="388" width="276" height="76" rx="10" />
+    <text class="s" x="326" y="408">② 데이터 분석 · 해석</text>
+    <rect class="oa" x="326" y="420" width="92" height="30" rx="15" /><text class="s c tO" x="372" y="440">GPT</text>
+    <path class="ln" d="M422 435 H468" /><text class="mut c" x="445" y="428">검토</text>
+    <rect class="an" x="472" y="420" width="102" height="30" rx="15" /><text class="s c tA" x="523" y="440">Claude</text>
+    <rect class="code" x="604" y="388" width="276" height="76" rx="10" />
+    <text class="s" x="618" y="408">④ 논문 서론 초안</text>
+    <rect class="an" x="618" y="420" width="92" height="30" rx="15" /><text class="s c tA" x="664" y="440">Claude</text>
+    <path class="ln" d="M714 435 H760" /><text class="mut c" x="737" y="428">검토</text>
+    <rect class="oa" x="764" y="420" width="102" height="30" rx="15" /><text class="s c tO" x="815" y="440">GPT</text>
+  </g>
+  <text class="xs" x="20" y="490">· 검토 입력: 결과 본문 + (있으면) 인용 번호가 붙은 근거 논문 초록 → 과잉해석 · 통계 오류 · 재현성 · 인용 불일치를 지적</text>
+  <text class="xs" x="20" y="508">· 검토 결과는 답변에 섞지 않고 '검토 노트'로 분리 전달, 검토 보드에 만든 회사 · 검토 회사와 함께 기록</text>
+  <text class="xs" x="20" y="526">· 연구 책임자가 검토위원 모델을 같은 회사로 지정해도, 다른 회사 모델이 있으면 그쪽을 우선한다</text>
+  <text class="mut" x="20" y="546">비교: Google AI Co-Scientist는 같은 모델 계열(Gemini) 안에서 검증 — 키스토는 회사가 다른 모델만 1순위로 둔다</text>
+</svg>
+
+<!-- ═════════ 그림 4. 근거 고정 인용 ═════════ -->
+<svg class="fig" id="fig-cite" width="900" height="530" viewBox="0 0 900 530">
+  <rect class="bg" width="900" height="530" />
+  <text class="ttl" x="20" y="34">알고리즘 3 · 근거 고정 인용 (Grounded Citation)</text>
+  <text class="dsc" x="20" y="54">LLM이 쓰는 영역과 코드가 정하는 영역을 나눠, 존재하지 않는 논문이 참고문헌에 들어갈 수 없게 했다</text>
+
+  <rect x="20" y="72" width="860" height="84" rx="8" fill="#faf7f0" stroke="#ece6da" />
+  <rect x="20" y="162" width="860" height="94" rx="8" fill="#ffffff" stroke="#ece6da" />
+  <rect x="20" y="262" width="860" height="94" rx="8" fill="#f1f6fd" stroke="#dce8f8" />
+  <rect x="20" y="362" width="860" height="84" rx="8" fill="#f1f3f6" stroke="#dfe3ea" />
+  <text class="b" x="32" y="110">외부 문헌 DB</text><text class="mut" x="32" y="127">실제 논문</text>
+  <text class="b" x="32" y="204">코드</text><text class="mut" x="32" y="221">결정적 처리</text>
+  <text class="b" x="32" y="304">LLM 생성</text><text class="mut" x="32" y="321">문장만 작성</text>
+  <text class="b" x="32" y="400">검토</text><text class="mut" x="32" y="417">다른 회사 모델</text>
+
+  <rect class="an" x="142" y="276" width="132" height="66" rx="9" />
+  <text class="b c" x="208" y="298">검색어 추출</text>
+  <text class="xs c" x="208" y="316">라우터가 영어</text>
+  <text class="xs c" x="208" y="331">검색어 3~8단어</text>
+  <rect class="code" x="290" y="84" width="132" height="60" rx="9" />
+  <text class="b c" x="356" y="108">PubMed</text>
+  <text class="xs c" x="356" y="126">생의학 우선</text>
+  <rect class="code" x="438" y="84" width="132" height="60" rx="9" />
+  <text class="b c" x="504" y="108">OpenAlex</text>
+  <text class="xs c" x="504" y="126">전 분야로 보완</text>
+  <rect class="code" x="438" y="176" width="132" height="66" rx="9" />
+  <text class="b c" x="504" y="198">병합 · 중복 제거</text>
+  <text class="xs c" x="504" y="216">DOI·제목 기준, 최대 6편</text>
+  <text class="xs c" x="504" y="231">초록 700자 첨부</text>
+  <rect class="code" x="586" y="176" width="132" height="66" rx="9" />
+  <text class="b c" x="652" y="198">인용 번호 [n]</text>
+  <text class="xs c" x="652" y="216">스레드 전체에서</text>
+  <text class="xs c" x="652" y="231">같은 번호 유지</text>
+  <rect class="an" x="586" y="276" width="132" height="66" rx="9" />
+  <text class="b c" x="652" y="298">근거 제한 작성</text>
+  <text class="xs c" x="652" y="316">[n]으로만 인용</text>
+  <text class="xs c" x="652" y="331">목록 밖 논문 금지</text>
+  <rect class="code" x="734" y="176" width="138" height="66" rx="9" />
+  <text class="b c" x="803" y="198">참고문헌 목록</text>
+  <text class="xs c" x="803" y="216">검색된 서지 그대로</text>
+  <text class="xs c" x="803" y="231">코드가 생성해 첨부</text>
+  <rect class="rv" x="734" y="372" width="138" height="66" rx="9" />
+  <text class="b c" x="803" y="394">인용 ↔ 초록 대조</text>
+  <text class="xs c" x="803" y="412">초록에 없는 주장을</text>
+  <text class="xs c" x="803" y="427">검토 노트로 지적</text>
+
+  <path class="ln" d="M274 300 H282 V114 H288" />
+  <path class="ln" d="M422 114 H436" />
+  <path class="ln" d="M504 144 V174" />
+  <path class="ln" d="M570 209 H584" />
+  <path class="ln" d="M652 242 V274" />
+  <path class="ln" d="M718 300 H726 V209 H732" />
+  <path class="ln" d="M652 342 V405 H732" />
+  <text class="lab" x="660" y="362">본문 + 근거 초록</text>
+
+  <rect class="go" x="20" y="460" width="860" height="56" rx="10" />
+  <text class="b" x="36" y="482">보장</text>
+  <text class="s" x="76" y="482">참고문헌 목록은 검색 결과로만 만들어지므로 존재하지 않는 논문이 목록에 들어갈 수 없다.</text>
+  <text class="s" x="76" y="502">초안도 같은 번호 목록으로만 인용하고, 근거가 없는 자리는 [참고문헌 필요]로 남긴다. 본문에 실제 인용된 번호만 목록에 붙는다.</text>
+</svg>
+
+<!-- ═════════ 그림 5. 자가 수정 분석 루프 ═════════ -->
+<svg class="fig" id="fig-analysis" width="900" height="478" viewBox="0 0 900 478">
+  <rect class="bg" width="900" height="478" />
+  <text class="ttl" x="20" y="34">알고리즘 4 · 자가 수정 분석 루프</text>
+  <text class="dsc" x="20" y="54">코드는 코딩에 강한 모델이 짜고, 실행 오류를 스스로 고치며, 해석은 연구 맥락을 가진 모델이 맡는다</text>
+
+  <rect class="code" x="20" y="84" width="176" height="160" rx="10" />
+  <text class="b" x="34" y="108">입력</text>
+  <text class="xs" x="34" y="132">· 분석 요청 (자연어)</text>
+  <text class="xs" x="34" y="152">· 첨부 CSV</text>
+  <text class="mut" x="44" y="168">파일명 · 행 수 · 열 이름</text>
+  <text class="xs" x="34" y="190">· 직전 분석 코드</text>
+  <text class="mut" x="44" y="206">"로그 변환해서 다시" 등</text>
+  <text class="xs" x="34" y="228">· 개인정보 가림 적용 후</text>
+  <path class="ln" d="M196 145 H216" />
+  <rect class="oa" x="218" y="110" width="150" height="70" rx="10" />
+  <text class="b c" x="293" y="134">코드 생성</text>
+  <text class="s c" x="293" y="152">분석 연구원 · GPT</text>
+  <text class="xs c" x="293" y="169">numpy·scipy·pandas만</text>
+  <path class="ln" d="M368 145 H390" />
+  <rect class="code" x="392" y="110" width="160" height="70" rx="10" />
+  <text class="b c" x="472" y="134">격리 실행</text>
+  <text class="xs c" x="472" y="153">임시 폴더 · 파일 복사본</text>
+  <text class="xs c" x="472" y="169">15초 제한 · pip 차단</text>
+  <path class="ln" d="M552 145 H574" />
+  <path d="M618 115 L648 145 L618 175 L588 145 Z" fill="#fff" stroke="#7d796f" stroke-width="1.4" transform="translate(-10 0)" />
+  <text class="b c" x="608" y="150">성공?</text>
+  <path class="ln" d="M608 175 V263 H554" /><text class="lab" x="616" y="214">실패</text>
+  <rect class="oa" x="392" y="230" width="160" height="66" rx="10" />
+  <text class="b c" x="472" y="253">오류 기반 수정</text>
+  <text class="xs c" x="472" y="271">코드 + 에러 메시지 → 새 코드</text>
+  <text class="xs c" x="472" y="287">최대 2회 반복</text>
+  <path class="ln" d="M472 230 V182" /><text class="lab" x="480" y="210">재실행</text>
+  <path class="ln" d="M638 145 H680" /><text class="lab" x="648" y="136">성공</text>
+  <text class="mut" x="392" y="312">2회 뒤에도 실패하면 오류 내용 그대로 해석</text>
+
+  <rect class="an" x="682" y="84" width="198" height="150" rx="10" />
+  <text class="b c" x="781" y="108">결과 해석</text>
+  <text class="s c" x="781" y="126">문헌 연구원과 같은 모델 · Claude</text>
+  <line x1="696" y1="138" x2="866" y2="138" stroke="#bcd2ef" />
+  <text class="xs" x="696" y="158">· 원래 요청 (데이터 출처·조건)</text>
+  <text class="xs" x="696" y="176">· 연구 맥락 (가설·이전 분석·</text>
+  <text class="xs" x="706" y="192">  연구자 해석)</text>
+  <text class="xs" x="696" y="210">· 코드 + 실행 출력</text>
+  <text class="lab" x="696" y="226" style="fill:#1d5fae">→ 가설을 지지하는가 / 반박하는가</text>
+  <path class="ln" d="M781 234 V256" />
+  <rect class="code" x="682" y="258" width="198" height="56" rx="10" />
+  <text class="b c" x="781" y="280">스레드에 기록</text>
+  <text class="xs c" x="781" y="298">code · output · interpretation · ok</text>
+  <path class="ln" d="M781 314 V336" />
+  <rect class="rv" x="682" y="338" width="198" height="56" rx="10" />
+  <text class="b c" x="781" y="360">교차검증</text>
+  <text class="xs c" x="781" y="378">코드를 만든 회사와 다른 모델이 검토</text>
+
+  <rect class="panel" x="20" y="320" width="640" height="112" rx="10" />
+  <text class="b" x="36" y="344">생성 규칙 — 모델이 넘지 못하게 한 선</text>
+  <text class="xs" x="36" y="368">· 사용자가 주지 않은 판정 기준(예: "허용 오차 ±10")을 만들어 통과/실패 결론을 내지 않는다 — 계산한 수치만 출력</text>
+  <text class="xs" x="36" y="388">· 패키지 설치 코드 금지 (프롬프트 + 실행 환경변수로 이중 차단 — 실제로 설치를 시도한 사례를 막은 뒤 추가)</text>
+  <text class="xs" x="36" y="408">· 원래 요청을 해석 단계에 함께 넘긴다 — 빠지면 "이 데이터가 성인 것인지 모른다"처럼 헛짚는다</text>
+  <text class="mut" x="20" y="458">검증된 동작: 데모 데이터(가상)에서 MAE · 상관계수 · Bland-Altman 계산 → 가설과 연결한 해석 → Claude가 "상관은 일치도가 아니다"를 지적 (2026-09-21)</text>
+</svg>
+
+<!-- ═════════ 그림 6. 대필 방지 집필 ═════════ -->
+<svg class="fig" id="fig-writing" width="900" height="430" viewBox="0 0 900 430">
+  <rect class="bg" width="900" height="430" />
+  <text class="ttl" x="20" y="34">알고리즘 5 · 대필하지 않는 집필 프로토콜</text>
+  <text class="dsc" x="20" y="54">연구자의 해석이 저장되기 전에는 초안이 만들어지지 않는 2단계 상태 기계</text>
+
+  <rect class="code" x="40" y="96" width="160" height="60" rx="30" />
+  <text class="b c" x="120" y="122">S0 · 초안 없음</text>
+  <text class="xs c" x="120" y="140">가설·분석 기록만 있음</text>
+  <rect class="amb" x="370" y="96" width="160" height="60" rx="30" />
+  <text class="b c" x="450" y="122">S1 · 해석 대기</text>
+  <text class="xs c" x="450" y="140">_awaiting_opinion = true</text>
+  <rect class="go" x="700" y="96" width="160" height="60" rx="30" />
+  <text class="b c" x="780" y="122">S2 · 초안 완성</text>
+  <text class="xs c" x="780" y="140">draft 저장 → 로드맵 5단계</text>
+  <path class="ln" d="M200 126 H368" /><text class="lab c" x="284" y="118">"초안 써줘"</text>
+  <path class="ln" d="M530 126 H698" /><text class="lab c" x="614" y="118">연구자가 해석을 답함</text>
+  <path class="ln" d="M752 96 C752 62 808 62 808 94" /><text class="lab" x="742" y="80" text-anchor="end">수정 요청 → 다시 작성</text>
+  <path class="dash" d="M284 132 V182" />
+  <path class="dash" d="M614 132 V182" />
+
+  <rect class="amb" x="40" y="184" width="400" height="160" rx="10" />
+  <text class="b" x="56" y="208">① 해석 질문 — 바로 쓰지 않는다</text>
+  <text class="xs" x="56" y="234">· 분석 결과의 핵심을 1~2줄만 짚고, 질문은 2개 이내</text>
+  <text class="mut" x="66" y="251">"이 결과를 어떻게 해석하나요?" "서론에서 무엇을 강조할까요?"</text>
+  <text class="xs" x="56" y="274">· 모델이 스스로 해석하거나 질문에 답하는 것을 금지</text>
+  <text class="xs" x="56" y="297">· 페르소나 · 검증을 거치지 않고 그대로 전달</text>
+  <text class="mut" x="66" y="314">말투를 다듬는 단계에서 질문에 스스로 답해 버리는 현상을</text>
+  <text class="mut" x="66" y="330">실제로 겪은 뒤, 질문 자체를 키스토 말투로 작성하게 바꿈</text>
+
+  <rect class="go" x="460" y="184" width="400" height="160" rx="10" />
+  <text class="b" x="476" y="208">② 해석을 반영한 초안</text>
+  <text class="xs" x="476" y="234">· 입력: 가설 + 분석 해석 + 연구자 해석 + 참고문헌 후보</text>
+  <text class="xs" x="476" y="256">· 연구자 해석은 반드시 반영, 마지막 줄에 '초안'임을 명시</text>
+  <text class="xs" x="476" y="278">· 맥락에 없는 수치 · 판정 기준 · 인용 생성 금지</text>
+  <text class="xs" x="476" y="300">· 본문의 [n]만 추출해 참고문헌 목록을 코드로 첨부</text>
+  <text class="xs" x="476" y="322">· 초안은 말투 변환 없이 원문 그대로 + 다른 회사 검토</text>
+
+  <rect class="panel" x="40" y="362" width="820" height="50" rx="10" />
+  <text class="b" x="56" y="384">연구 윤리 + 학습 효과</text>
+  <text class="s" x="200" y="384">해석은 연구자의 몫으로 남기고, AI는 그 해석을 글로 옮기는 일만 한다.</text>
+  <text class="xs" x="200" y="402">연구자가 쓴 해석은 스레드에 저장되어 연구노트와 이후 모든 모듈의 맥락에 함께 들어간다.</text>
+</svg>
+
+<!-- ═════════ 그림 7. 연구 메모리와 실데이터 게임화 ═════════ -->
+<svg class="fig" id="fig-memory" width="900" height="480" viewBox="0 0 900 480">
+  <rect class="bg" width="900" height="480" />
+  <text class="ttl" x="20" y="34">알고리즘 6 · 연구 메모리와 실데이터 기반 게임화</text>
+  <text class="dsc" x="20" y="54">로드맵·연구실·대시보드의 모든 수치는 스레드에 저장된 기록에서 계산된다 — 기록이 없으면 채워지지 않는다</text>
+
+  <rect class="dark" x="20" y="74" width="300" height="330" rx="10" />
+  <text class="wb" x="36" y="98">연구 스레드 (주제 1개)</text>
+  <text class="mono" x="36" y="124">thread {</text>
+  <text class="mono" x="48" y="146"><tspan class="k">topic</tspan>, <tspan class="k">created_at</tspan></text>
+  <text class="mono" x="48" y="168"><tspan class="k">hypotheses</tspan>[]  <tspan class="cm"># 문헌 연구원</tspan></text>
+  <text class="mono" x="48" y="190"><tspan class="k">references</tspan>[]  <tspan class="cm"># 검색된 논문</tspan></text>
+  <text class="mono" x="48" y="212"><tspan class="k">files</tspan>[]       <tspan class="cm"># 첨부 CSV</tspan></text>
+  <text class="mono" x="48" y="234"><tspan class="k">analysis</tspan>[]    <tspan class="cm"># 코드·출력·해석</tspan></text>
+  <text class="mono" x="48" y="256"><tspan class="k">verifications</tspan>[]<tspan class="cm"># 분석 검증</tspan></text>
+  <text class="mono" x="48" y="278"><tspan class="k">reviews</tspan>[]     <tspan class="cm"># 만든·검토 회사</tspan></text>
+  <text class="mono" x="48" y="300"><tspan class="k">interpretation</tspan> <tspan class="cm"># 연구자 해석</tspan></text>
+  <text class="mono" x="48" y="322"><tspan class="k">draft</tspan>, <tspan class="k">draft_at</tspan></text>
+  <text class="mono" x="48" y="344"><tspan class="k">turns</tspan>[], <tspan class="k">activity</tspan>[] <tspan class="cm"># 시간·모델</tspan></text>
+  <text class="mono" x="36" y="366">}</text>
+  <text class="ws" x="36" y="392">모든 모듈에 요약본(thread_brief) 주입</text>
+
+  <path class="ln" d="M320 238 H346" />
+  <rect class="code" x="348" y="74" width="270" height="330" rx="10" />
+  <text class="b" x="364" y="98">로드맵 5단계 판정 (술어)</text>
+  <g>
+    <circle cx="378" cy="130" r="11" class="go" /><text class="lab c" x="378" y="134">1</text>
+    <text class="s" x="396" y="127">주제 잡기</text><text class="mut" x="396" y="142">⇐ 스레드가 존재</text>
+    <circle cx="378" cy="178" r="11" class="go" /><text class="lab c" x="378" y="182">2</text>
+    <text class="s" x="396" y="175">가설 세우기</text><text class="mut" x="396" y="190">⇐ hypotheses ≠ ∅</text>
+    <circle cx="378" cy="226" r="11" class="go" /><text class="lab c" x="378" y="230">3</text>
+    <text class="s" x="396" y="223">분석 돌리기</text><text class="mut" x="396" y="238">⇐ analysis ≠ ∅</text>
+    <circle cx="378" cy="274" r="11" class="amb" /><text class="lab c" x="378" y="278">4</text>
+    <text class="s" x="396" y="271">교차검증</text><text class="mut" x="396" y="286">⇐ verifications ≠ ∅</text>
+    <circle cx="378" cy="322" r="11" class="code" /><text class="lab c" x="378" y="326">5</text>
+    <text class="s" x="396" y="319">초안 쓰기</text><text class="mut" x="396" y="334">⇐ draft 저장됨</text>
+  </g>
+  <rect x="364" y="356" width="238" height="12" rx="6" fill="#ece6da" />
+  <rect x="364" y="356" width="143" height="12" rx="6" fill="#1baf7a" />
+  <text class="xs" x="364" y="390">진행률 = 달성 단계 수 / 5  (예: 3/5 = 60%)</text>
+
+  <path class="ln" d="M618 238 H644" />
+  <rect class="an" x="646" y="74" width="234" height="96" rx="10" />
+  <text class="b" x="660" y="96">연구실 화면</text>
+  <text class="xs" x="660" y="118">책 = 찾은 논문 수 (서재)</text>
+  <text class="xs" x="660" y="136">시험관 = 분석 횟수 (실험대)</text>
+  <text class="xs" x="660" y="154">메모지 = 검토 기록 (검토 보드)</text>
+  <rect class="amb" x="646" y="180" width="234" height="96" rx="10" />
+  <text class="b" x="660" y="202">연구실 레벨</text>
+  <text class="xs" x="660" y="224">달성한 단계 1개 = 별 1개</text>
+  <text class="xs" x="660" y="242">별 5개마다 레벨 +1</text>
+  <text class="mut" x="660" y="260">새내기 연구실 → … → 명예의 전당</text>
+  <rect class="go" x="646" y="286" width="234" height="118" rx="10" />
+  <text class="b" x="660" y="308">대시보드</text>
+  <text class="xs" x="660" y="330">이종 검토 비율 =</text>
+  <text class="xs" x="672" y="346">만든 회사 ≠ 검토 회사인 검토 / 전체 검토</text>
+  <text class="xs" x="660" y="366">연구원별 작업 시간 = activity 단계 합</text>
+  <text class="xs" x="660" y="386">회사별 호출 = 실제로 답한 모델 기준</text>
+
+  <rect class="panel" x="20" y="420" width="860" height="44" rx="10" />
+  <text class="s" x="36" y="447">'주제별 대화 폴더' 대신 진행 단계를 보여준다 — 같은 기록이 대화 맥락, 로드맵, 연구실 그림, 대시보드, 연구노트를 동시에 만든다</text>
+</svg>
+
+<!-- ═════════ 보충 1. 연구자 여정 before / after ═════════ -->
+<svg class="fig" id="fig-journey" width="900" height="452" viewBox="0 0 900 452">
+  <rect class="bg" width="900" height="452" />
+  <text class="ttl" x="20" y="34">연구자 여정 — 기존 방식과 키스토</text>
+  <text class="dsc" x="20" y="54">같은 연구 질문(주제 탐색 → 분석 → 검토 → 서론 초안)을 처리하는 두 가지 방식</text>
+
+  <rect x="20" y="72" width="860" height="168" rx="12" fill="#f3f1ec" stroke="#e6e1d6" />
+  <text class="b" x="36" y="100">기존 방식</text>
+  <text class="mut" x="36" y="118">혼자 여러 도구를</text>
+  <text class="mut" x="36" y="133">오가며 진행</text>
+  <text class="b" x="36" y="198" style="fill:#b54848">합계 약 5시간</text>
+  <text class="mut" x="36" y="214">(가정치)</text>
+  <g>
+    <rect class="code" x="150" y="88" width="170" height="76" rx="9" /><text class="b c" x="235" y="112">선행 연구 파악</text><text class="xs c" x="235" y="131">검색 · 논문 읽기 · 정리</text><text class="lab c" x="235" y="152">약 2시간</text>
+    <rect class="code" x="332" y="88" width="170" height="76" rx="9" /><text class="b c" x="417" y="112">분석 코드</text><text class="xs c" x="417" y="131">직접 작성 · 디버깅</text><text class="lab c" x="417" y="152">약 1시간</text>
+    <rect class="code" x="514" y="88" width="170" height="76" rx="9" /><text class="b c" x="599" y="112">결과 검토</text><text class="xs c" x="599" y="131">선배 일정 기다리기</text><text class="lab c" x="599" y="152">약 30분 + 대기</text>
+    <rect class="code" x="696" y="88" width="170" height="76" rx="9" /><text class="b c" x="781" y="112">서론 초안</text><text class="xs c" x="781" y="131">빈 화면에서 시작</text><text class="lab c" x="781" y="152">약 1시간 30분</text>
+    <path class="ln" d="M320 126 H330" /><path class="ln" d="M502 126 H512" /><path class="ln" d="M684 126 H694" />
+    <rect x="150" y="180" width="170" height="26" rx="13" fill="#fdecec" stroke="#e3a0a0" /><text class="xs c" x="235" y="197" style="fill:#a33c3c">창이 나뉘어 맥락이 끊김</text>
+    <rect x="332" y="180" width="170" height="26" rx="13" fill="#fdecec" stroke="#e3a0a0" /><text class="xs c" x="417" y="197" style="fill:#a33c3c">같은 모델이 자기 결과 검증</text>
+    <rect x="514" y="180" width="170" height="26" rx="13" fill="#fdecec" stroke="#e3a0a0" /><text class="xs c" x="599" y="197" style="fill:#a33c3c">기초 질문하기가 부담</text>
+    <rect x="696" y="180" width="170" height="26" rx="13" fill="#fdecec" stroke="#e3a0a0" /><text class="xs c" x="781" y="197" style="fill:#a33c3c">없는 논문 인용 위험</text>
+  </g>
+
+  <rect x="20" y="252" width="860" height="168" rx="12" fill="#eef4fc" stroke="#d8e6f7" />
+  <text class="b" x="36" y="280">키스토</text>
+  <text class="mut" x="36" y="298">캐릭터 한 명에게</text>
+  <text class="mut" x="36" y="313">말하기만 하면 됨</text>
+  <text class="b" x="36" y="378" style="fill:#1d5fae">합계 4분 52초</text>
+  <text class="mut" x="36" y="394">(실측)</text>
+  <g>
+    <rect class="an" x="150" y="268" width="170" height="76" rx="9" /><text class="b c" x="235" y="292">주제 탐색</text><text class="xs c" x="235" y="311">실제 논문 6편 · 가설 비교</text><text class="lab c tA" x="235" y="332">82초</text>
+    <rect class="oa" x="332" y="268" width="170" height="76" rx="9" /><text class="b c" x="417" y="292">데이터 분석</text><text class="xs c" x="417" y="311">코드 작성 · 실행 · 해석</text><text class="lab c tO" x="417" y="332">90초</text>
+    <rect class="rv" x="514" y="268" width="170" height="76" rx="9" /><text class="b c" x="599" y="292">다른 회사 검토</text><text class="xs c" x="599" y="311">단계마다 자동 수행</text><text class="lab c" x="599" y="332">각 단계 시간에 포함</text>
+    <rect class="an" x="696" y="268" width="170" height="76" rx="9" /><text class="b c" x="781" y="292">해석 질문 → 초안</text><text class="xs c" x="781" y="311">연구자 해석을 반영</text><text class="lab c tA" x="781" y="332">12초 + 107초</text>
+    <path class="ln" d="M320 306 H330" /><path class="ln" d="M502 306 H512" /><path class="ln" d="M684 306 H694" />
+    <rect class="go" x="150" y="360" width="170" height="26" rx="13" /><text class="xs c" x="235" y="377" style="fill:#128a5f">한 스레드에 맥락 유지</text>
+    <rect class="go" x="332" y="360" width="170" height="26" rx="13" /><text class="xs c" x="417" y="377" style="fill:#128a5f">다른 회사 모델이 검토</text>
+    <rect class="go" x="514" y="360" width="170" height="26" rx="13" /><text class="xs c" x="599" y="377" style="fill:#128a5f">몇 번이든 부담 없이 질문</text>
+    <rect class="go" x="696" y="360" width="170" height="26" rx="13" /><text class="xs c" x="781" y="377" style="fill:#128a5f">검색된 논문만 인용</text>
+  </g>
+  <text class="mut" x="20" y="442">기존 방식 시간은 신입 연구자가 직접 수행할 때의 가정치(신청서 3-3과 같은 값) · 키스토 시간은 2026-09-21 실측</text>
+</svg>
+
+<!-- ═════════ 보충 2. 데모 실행 타임라인 ═════════ -->
+<svg class="fig" id="fig-timeline" width="900" height="476" viewBox="0 0 900 476">
+  <rect class="bg" width="900" height="476" />
+  <text class="ttl" x="20" y="34">데모 실행 타임라인 — 주제에서 서론 초안까지 292초</text>
+  <text class="dsc" x="20" y="54">2026-09-21 실제 실행 기록 · 막대 색 = 결과를 만든 회사 · 신생아 비접촉 심박 측정 시나리오 (가상 데이터)</text>
+
+  <g stroke="#efe9dd" stroke-width="1">
+    <line x1="180" y1="78" x2="180" y2="262" /><line x1="316" y1="78" x2="316" y2="262" /><line x1="452" y1="78" x2="452" y2="262" />
+    <line x1="588" y1="78" x2="588" y2="262" /><line x1="724" y1="78" x2="724" y2="262" /><line x1="860" y1="78" x2="860" y2="262" />
+  </g>
+  <text class="b" x="20" y="102">① 주제 탐색</text><text class="mut" x="20" y="116">실제 논문 6편 검색</text>
+  <rect x="180" y="88" width="186" height="28" rx="5" fill="#2a78d6" />
+  <text x="190" y="107" style="font-size:11px;font-weight:700;fill:#fff">Claude · 82초 · 검토 Gemini</text>
+  <text class="b" x="20" y="146">② 데이터 분석</text><text class="mut" x="20" y="160">코드 작성 · 실행 · 해석</text>
+  <rect x="366" y="132" width="204" height="28" rx="5" fill="#eb6834" />
+  <text x="376" y="151" style="font-size:11px;font-weight:700;fill:#fff">GPT · 90초 · 검토 Claude</text>
+  <text class="b" x="20" y="190">③ 해석 질문</text><text class="mut" x="20" y="204">대필하지 않고 먼저 묻기</text>
+  <rect x="570" y="176" width="27" height="28" rx="5" fill="#2a78d6" />
+  <text class="xs" x="604" y="195">Claude · 12초 · 검토 없음 (질문 단계)</text>
+  <text class="b" x="20" y="234">④ 서론 초안</text><text class="mut" x="20" y="248">연구자 해석 반영</text>
+  <rect x="597" y="220" width="243" height="28" rx="5" fill="#2a78d6" />
+  <text x="607" y="239" style="font-size:11px;font-weight:700;fill:#fff">Claude · 107초 · 검토 GPT</text>
+
+  <line x1="180" y1="266" x2="860" y2="266" stroke="#7d796f" />
+  <g class="xs c">
+    <text x="180" y="282">0</text><text x="316" y="282">1분</text><text x="452" y="282">2분</text>
+    <text x="588" y="282">3분</text><text x="724" y="282">4분</text><text x="860" y="282" text-anchor="end">5분</text>
+  </g>
+
+  <text class="b" x="20" y="322">로드맵 진행</text><text class="mut" x="20" y="336">저장된 기록으로 판정</text>
+  <path d="M180 344 H366 V326 H570 V309 H840 V300 H860 V344 Z" fill="#e3f5ee" />
+  <path d="M180 344 H366 V326 H570 V309 H840 V300 H860" stroke="#1baf7a" stroke-width="2.5" fill="none" />
+  <text class="lab" x="372" y="321">40%</text><text class="lab" x="576" y="304">80%</text><text class="lab" x="846" y="294" text-anchor="end" style="fill:#128a5f">100%</text>
+  <text class="mut" x="190" y="338">0%</text>
+
+  <rect class="panel" x="20" y="362" width="860" height="102" rx="10" />
+  <text class="b" x="36" y="386">같은 시나리오의 소요 시간 추이</text>
+  <text class="xs" x="36" y="410">9/18 · 순차 실행</text>
+  <rect x="250" y="398" width="420" height="16" rx="3" fill="#b9b2a5" /><text class="lab" x="678" y="411">435초</text>
+  <text class="xs" x="36" y="432">9/18 · 검토 · 말투 병렬화</text>
+  <rect x="250" y="420" width="287" height="16" rx="3" fill="#8fb4e6" /><text class="lab" x="545" y="433">297초</text>
+  <text class="xs" x="36" y="454">9/21 · 3사 모델 구성</text>
+  <rect x="250" y="442" width="282" height="16" rx="3" fill="#2a78d6" /><text class="lab" x="540" y="455" style="fill:#1d5fae">292초</text>
+</svg>
+
+<!-- ═════════ 보충 3. 교차검증 실증 과정 ═════════ -->
+<svg class="fig" id="fig-hardening" width="900" height="416" viewBox="0 0 900 416">
+  <rect class="bg" width="900" height="416" />
+  <text class="ttl" x="20" y="34">이종 교차검증 실증 과정 — 같은 날 네 번의 실행</text>
+  <text class="dsc" x="20" y="54">2026-09-21 · 3사 모델을 실제로 연동하자 드러난 문제를 하나씩 고쳐 3건 모두 다른 회사 검토에 도달</text>
+
+  <rect class="code" x="20" y="78" width="206" height="246" rx="10" />
+  <text class="b" x="36" y="102">1차 실행</text>
+  <text x="36" y="140" style="font-size:28px;font-weight:800;fill:#b54848">1 / 3</text><text class="mut" x="112" y="138">이종 검증</text>
+  <rect x="36" y="152" width="54" height="8" rx="4" fill="#1baf7a" /><rect x="96" y="152" width="54" height="8" rx="4" fill="#ece6da" /><rect x="156" y="152" width="54" height="8" rx="4" fill="#ece6da" />
+  <text class="lab" x="36" y="186">겪은 문제</text>
+  <text class="xs" x="36" y="204">Gemini 503 (요청 폭주)</text>
+  <text class="xs" x="36" y="220">OpenAI 모델 404 (모델 없음)</text>
+  <text class="lab" x="36" y="254" style="fill:#1d5fae">→ 조치</text>
+  <text class="xs" x="36" y="272">호출 단위 자동 대체</text>
+  <text class="xs" x="36" y="288">일시적 오류 재시도 추가</text>
+
+  <rect class="code" x="238" y="78" width="206" height="246" rx="10" />
+  <text class="b" x="254" y="102">2차 실행</text>
+  <text x="254" y="140" style="font-size:28px;font-weight:800;fill:#d99a1e">2 / 3</text><text class="mut" x="330" y="138">이종 검증</text>
+  <rect x="254" y="152" width="54" height="8" rx="4" fill="#1baf7a" /><rect x="314" y="152" width="54" height="8" rx="4" fill="#1baf7a" /><rect x="374" y="152" width="54" height="8" rx="4" fill="#ece6da" />
+  <text class="lab" x="254" y="186">겪은 문제</text>
+  <text class="xs" x="254" y="204">Gemini 503이 14초 넘게</text>
+  <text class="xs" x="254" y="220">지속된 단계만 실패</text>
+  <text class="lab" x="254" y="254" style="fill:#1d5fae">→ 조치</text>
+  <text class="xs" x="254" y="272">같은 회사의 다른 Gemini</text>
+  <text class="xs" x="254" y="288">모델로 먼저 넘어가게 변경</text>
+
+  <rect class="code" x="456" y="78" width="206" height="246" rx="10" />
+  <text class="b" x="472" y="102">3차 실행</text>
+  <text x="472" y="140" style="font-size:28px;font-weight:800;fill:#b9b2a5">–</text><text class="mut" x="500" y="138">측정 안 함</text>
+  <rect x="472" y="152" width="174" height="8" rx="4" fill="#ece6da" />
+  <text class="lab" x="472" y="186">목적</text>
+  <text class="xs" x="472" y="204">OpenAI 크레딧 충전 전</text>
+  <text class="xs" x="472" y="220">연결 상태 점검</text>
+  <text class="lab" x="472" y="254" style="fill:#1d5fae">→ 조치</text>
+  <text class="xs" x="472" y="272">크레딧 충전 후</text>
+  <text class="xs" x="472" y="288">최종 실행</text>
+
+  <rect class="go" x="674" y="78" width="206" height="246" rx="10" />
+  <text class="b" x="690" y="102">최종 실행</text>
+  <text x="690" y="140" style="font-size:28px;font-weight:800;fill:#128a5f">3 / 3</text><text class="mut" x="766" y="138">이종 검증</text>
+  <rect x="690" y="152" width="54" height="8" rx="4" fill="#1baf7a" /><rect x="750" y="152" width="54" height="8" rx="4" fill="#1baf7a" /><rect x="810" y="152" width="54" height="8" rx="4" fill="#1baf7a" />
+  <text class="lab" x="690" y="186">겪은 문제</text>
+  <text class="xs" x="690" y="204">4단계에서 Gemini 무료</text>
+  <text class="xs" x="690" y="220">한도 초과 (429)</text>
+  <text class="lab" x="690" y="254" style="fill:#128a5f">→ 결과</text>
+  <text class="xs" x="690" y="272">GPT가 대신 검토해</text>
+  <text class="xs" x="690" y="288">다른 회사 검토 유지</text>
+
+  <path class="ln" d="M226 200 H236" /><path class="ln" d="M444 200 H454" /><path class="ln" d="M662 200 H672" />
+
+  <rect class="panel" x="20" y="340" width="860" height="62" rx="10" />
+  <text class="b" x="36" y="366">교훈</text>
+  <text class="s" x="80" y="366">외부 API는 실제로 자주 막힌다. 호출 단위 자동 대체와 '실제로 답한 모델' 기록이 없으면</text>
+  <text class="s" x="80" y="386">교차검증 비율 자체를 믿을 수 없다 — 키스토는 두 가지를 모두 코드로 보장한다.</text>
+</svg>
+
+<!-- ═════════ 보충 4. 검토위원이 잡아낸 오류 ═════════ -->
+<svg class="fig" id="fig-catches" width="900" height="448" viewBox="0 0 900 448">
+  <rect class="bg" width="900" height="448" />
+  <text class="ttl" x="20" y="34">검토위원이 실제로 잡아낸 오류</text>
+  <text class="dsc" x="20" y="54">결과를 만든 모델이 자기 결과에서 놓친 것을, 다른 회사 모델이 짚었다 — 검토 3건 모두 '지적 있음'</text>
+
+  <!-- 카드 1 -->
+  <rect class="code" x="20" y="76" width="270" height="302" rx="12" />
+  <rect class="an" x="34" y="90" width="80" height="24" rx="12" /><text class="lab c tA" x="74" y="106">Claude</text>
+  <path class="ln" d="M118 102 H140" />
+  <rect class="go" x="144" y="90" width="80" height="24" rx="12" /><text class="lab c tG" x="184" y="106">Gemini</text>
+  <text class="b" x="34" y="140">① 문헌 정리 검토</text>
+  <rect x="34" y="154" width="62" height="18" rx="9" fill="#fdecec" stroke="#e3a0a0" /><text class="lab c" x="65" y="167" style="fill:#a33c3c">사실 오류</text>
+  <text class="xs" x="34" y="190">근거 논문 [2]의 NIRS는 피부에 붙이는</text>
+  <text class="xs" x="34" y="206">접촉식인데 '비접촉' 기술로 잘못 설명</text>
+  <rect class="amb" x="34" y="222" width="62" height="18" rx="9" /><text class="lab c" x="65" y="235">과대평가</text>
+  <text class="xs" x="34" y="258">신생아 영상은 개인정보·윤리 문제로</text>
+  <text class="xs" x="34" y="274">공개 데이터가 드묾 — 실현 가능성 과대</text>
+  <rect class="amb" x="34" y="290" width="44" height="18" rx="9" /><text class="lab c" x="56" y="303">누락</text>
+  <text class="xs" x="34" y="326">논문 [3] 초록에 이미 있는 기법을</text>
+  <text class="xs" x="34" y="342">연구 공백처럼 서술</text>
+
+  <!-- 카드 2 -->
+  <rect class="code" x="315" y="76" width="270" height="302" rx="12" />
+  <rect class="oa" x="329" y="90" width="80" height="24" rx="12" /><text class="lab c tO" x="369" y="106">GPT</text>
+  <path class="ln" d="M413 102 H435" />
+  <rect class="an" x="439" y="90" width="80" height="24" rx="12" /><text class="lab c tA" x="479" y="106">Claude</text>
+  <text class="b" x="329" y="140">② 분석 결과 검토</text>
+  <rect x="329" y="154" width="82" height="18" rx="9" fill="#fdecec" stroke="#e3a0a0" /><text class="lab c" x="370" y="167" style="fill:#a33c3c">통계 과대해석</text>
+  <text class="xs" x="329" y="190">피어슨 r은 일치도가 아니라 연관성 지표</text>
+  <text class="xs" x="329" y="206">— r=0.95로 측정 일치를 주장할 수 없다</text>
+  <text class="mut" x="329" y="222">(Bland-Altman 방법론이 경고하는 오류)</text>
+  <rect class="amb" x="329" y="238" width="62" height="18" rx="9" /><text class="lab c" x="360" y="251">보고 누락</text>
+  <text class="xs" x="329" y="274">n=12에서 편향(bias)의 신뢰구간이</text>
+  <text class="xs" x="329" y="290">제시되지 않음</text>
+
+  <!-- 카드 3 -->
+  <rect class="code" x="610" y="76" width="270" height="302" rx="12" />
+  <rect class="an" x="624" y="90" width="80" height="24" rx="12" /><text class="lab c tA" x="664" y="106">Claude</text>
+  <path class="ln" d="M708 102 H730" />
+  <rect class="oa" x="734" y="90" width="80" height="24" rx="12" /><text class="lab c tO" x="774" y="106">GPT</text>
+  <text class="b" x="624" y="140">④ 서론 초안 검토</text>
+  <rect x="624" y="154" width="92" height="18" rx="9" fill="#fdecec" stroke="#e3a0a0" /><text class="lab c" x="670" y="167" style="fill:#a33c3c">사실 오류 · 재발</text>
+  <text class="xs" x="624" y="190">①에서 지적된 'NIRS 비접촉' 오류가</text>
+  <text class="xs" x="624" y="206">초안에 그대로 남아 있음</text>
+  <rect class="amb" x="624" y="222" width="72" height="18" rx="9" /><text class="lab c" x="660" y="235">인용 불일치</text>
+  <text class="xs" x="624" y="258">인용 [6]이 해당 문장의 근거로</text>
+  <text class="xs" x="624" y="274">맞지 않음</text>
+  <rect class="amb" x="624" y="290" width="44" height="18" rx="9" /><text class="lab c" x="646" y="303">통계</text>
+  <text class="xs" x="624" y="326">반복측정 구조에서 상관계수가</text>
+  <text class="xs" x="624" y="342">부풀려질 가능성</text>
+
+  <path d="M155 378 V394 H745 V378" stroke="#d65c5c" stroke-width="1.4" stroke-dasharray="5 3" fill="none" />
+  <text class="lab c" x="450" y="412" style="fill:#a33c3c">같은 오류(NIRS)를 서로 다른 회사 모델이, 서로 다른 단계에서 독립적으로 지적</text>
+  <text class="mut" x="20" y="438">2026-09-21 실행 기록 발췌 · 분석 수치는 가상 데이터 · 검토 노트는 자동 수정이 아니라 연구 책임자가 판단하도록 보여주는 노트</text>
+</svg>
+
+<!-- ═════════ 보충 5. 확산 로드맵 ═════════ -->
+<svg class="fig" id="fig-scaleup" width="900" height="440" viewBox="0 0 900 440">
+  <rect class="bg" width="900" height="440" />
+  <text class="ttl" x="20" y="34">확산 로드맵 — 개인 연구실에서 기관으로</text>
+  <text class="dsc" x="20" y="54">지금 동작하는 개인용 구조를 그대로 넓혀 가는 단계 (②~④는 계획)</text>
+
+  <rect class="an" x="20" y="240" width="206" height="150" rx="10" />
+  <rect x="150" y="250" width="66" height="20" rx="10" fill="#2a78d6" /><text class="lab c" x="183" y="264" style="fill:#fff">지금 동작</text>
+  <text class="b" x="34" y="266">① 개인 연구자</text>
+  <text class="xs" x="34" y="298">· 바탕화면 아이콘 하나로 실행</text>
+  <text class="xs" x="34" y="318">· 분야는 KISTO.md 한 파일로 지정</text>
+  <text class="xs" x="34" y="338">· 별도 서버 불필요</text>
+
+  <rect class="go" x="238" y="200" width="206" height="190" rx="10" />
+  <rect x="388" y="210" width="46" height="20" rx="10" fill="#fff" stroke="#1baf7a" /><text class="lab c" x="411" y="224" style="fill:#128a5f">계획</text>
+  <text class="b" x="252" y="226">② 신입 온보딩</text>
+  <text class="xs" x="252" y="258">· 연구 절차를 5단계 로드맵으로</text>
+  <text class="xs" x="262" y="274">구조화</text>
+  <text class="xs" x="252" y="294">· 첫 주제를 함께 한 바퀴 돌며 실습</text>
+  <text class="xs" x="252" y="314">· 선임의 반복 설명 부담 경감</text>
+
+  <rect class="amb" x="456" y="160" width="206" height="230" rx="10" />
+  <rect x="606" y="170" width="46" height="20" rx="10" fill="#fff" stroke="#d99a1e" /><text class="lab c" x="629" y="184" style="fill:#a8720f">계획</text>
+  <text class="b" x="470" y="186">③ 공동 연구</text>
+  <text class="xs" x="470" y="218">· 과제 단위로 연구 기록 병합</text>
+  <text class="xs" x="470" y="238">· 데이터는 각자 PC, 요약만 공유</text>
+  <text class="xs" x="470" y="258">· 연구실 단위 오류 유형 통계</text>
+
+  <rect class="rv" x="674" y="120" width="206" height="270" rx="10" />
+  <rect x="824" y="130" width="46" height="20" rx="10" fill="#fff" stroke="#334155" /><text class="lab c" x="847" y="144" style="fill:#334155">계획</text>
+  <text class="b" x="688" y="146">④ 기관 · 사업화</text>
+  <text class="xs" x="688" y="178">· 역할별 사내 · 로컬 LLM으로 교체</text>
+  <text class="xs" x="688" y="198">· 구독형 앱 · 기관 라이선스</text>
+  <text class="xs" x="688" y="218">· 컨테이너 격리 · 사내 시스템 연동</text>
+
+  <path d="M60 226 Q 300 150 560 118 T 860 88" stroke="#b9b2a5" stroke-width="1.4" stroke-dasharray="5 4" fill="none" marker-end="url(#ah)" />
+  <text class="lab" x="36" y="216" style="fill:#9a968c">사용 범위</text>
+
+  <rect class="panel" x="20" y="400" width="860" height="30" rx="8" />
+  <text class="s" x="36" y="420">공통 기반 — 설정만으로 모델 교체 · 분야 무관 문헌 검색(PubMed + OpenAlex) · 개인정보 자동 가림 · 로컬 실행</text>
+</svg>
+
+<!-- ═════════ 보충 6. 포지셔닝 맵 ═════════ -->
+<svg class="fig" id="fig-position" width="900" height="500" viewBox="0 0 900 500">
+  <rect class="bg" width="900" height="500" />
+  <text class="ttl" x="20" y="34">포지셔닝 — 키스토가 채우는 빈자리</text>
+  <text class="dsc" x="20" y="54">가로: 결과를 누가 검증하는가 · 세로: 연구의 어디까지 함께하는가</text>
+
+  <rect x="480" y="80" width="380" height="170" fill="#eef7f2" />
+  <line x1="120" y1="250" x2="860" y2="250" stroke="#d9d2c3" stroke-dasharray="4 4" />
+  <line x1="480" y1="80" x2="480" y2="420" stroke="#d9d2c3" stroke-dasharray="4 4" />
+  <path class="ln" d="M120 420 H862" /><path class="ln" d="M120 420 V78" />
+  <text class="xs" x="124" y="440">한 회사 모델 · 자기 검증</text>
+  <text class="xs" x="860" y="440" text-anchor="end">다른 회사 모델이 교차검증</text>
+  <text class="xs" x="110" y="96" text-anchor="end">연구 과정</text>
+  <text class="xs" x="110" y="112" text-anchor="end">전체</text>
+  <text class="xs" x="110" y="400" text-anchor="end">질문 단위</text>
+  <text class="xs" x="110" y="416" text-anchor="end">대화</text>
+
+  <rect class="code" x="150" y="110" width="290" height="76" rx="10" />
+  <text class="b" x="166" y="134">연구 자동화 에이전트</text>
+  <text class="xs" x="166" y="154">Co-Scientist · Kosmos · AI Scientist</text>
+  <text class="mut" x="166" y="172">예: Co-Scientist는 Gemini 계열 안에서 생성 · 검증</text>
+
+  <rect class="code" x="150" y="298" width="220" height="52" rx="10" />
+  <text class="b" x="166" y="320">범용 AI 챗</text>
+  <text class="xs" x="166" y="338">질문마다 새 창 · 한 회사 모델</text>
+  <rect class="code" x="150" y="360" width="220" height="52" rx="10" />
+  <text class="b" x="166" y="382">AI 데스크톱 펫</text>
+  <text class="xs" x="166" y="400">캐릭터 옷을 입은 단일 LLM 챗봇</text>
+  <rect x="300" y="368" width="58" height="18" rx="9" fill="#fff4dc" stroke="#d99a1e" /><text class="lab c" x="329" y="381">캐릭터</text>
+
+  <rect class="code" x="390" y="298" width="220" height="68" rx="10" />
+  <text class="b" x="406" y="320">여러 모델 나란히 비교</text>
+  <text class="xs" x="406" y="338">여러 답을 나란히 보여주는 방식</text>
+  <text class="mut" x="406" y="354">어느 답이 맞는지는 사용자가 판단</text>
+
+  <rect class="an" x="540" y="104" width="296" height="118" rx="12" style="stroke-width:2.2" />
+  <text x="558" y="134" style="font-size:18px;font-weight:800;fill:#1d5fae">키스토</text>
+  <rect x="624" y="120" width="58" height="18" rx="9" fill="#fff4dc" stroke="#d99a1e" /><text class="lab c" x="653" y="133">캐릭터</text>
+  <text class="s" x="558" y="158">캐릭터 한 명 + 뒤에서 도는 연구 파이프라인</text>
+  <text class="xs" x="558" y="178">결과마다 다른 회사 모델이 검토 (코드로 강제)</text>
+  <text class="xs" x="558" y="196">검색된 논문만 인용 · 대필하지 않음</text>
+  <text class="xs" x="558" y="212">개인 PC에서 실행 · 진행 단계를 게임처럼 표시</text>
+
+  <text class="mut" x="20" y="486">구조적 특징을 기준으로 한 정성 비교이며, 각 서비스의 성능을 비교한 것이 아니다</text>
+</svg>
+
+<script>
+  // #fig-xxx 로 열면 그 그림만 보여준다 (PNG 저장용)
+  const id = location.hash.slice(1);
+  if (id) document.querySelectorAll("svg.fig").forEach((s) => { if (s.id !== id) s.style.display = "none"; });
+</script>

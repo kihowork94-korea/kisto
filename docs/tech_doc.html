@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<!-- 키스토 기술 문서. scripts/render_diagrams.py --doc 으로 docs/KISTO_기술문서.pdf를 만든다.
+     그림은 images/diagram_*.png (원본 images/diagrams_source.html). 수치는 docs/results_2026-09-21.md 기준. -->
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>키스토 기술 문서</title>
+<style>
+  @page { size: A4; margin: 16mm 16mm 18mm; }
+  :root { --ink: #1f2937; --sec: #4b4a46; --muted: #8a877f; --line: #e3dccd; --tint: #f7f3ea;
+          --an: #2a78d6; --oa: #eb6834; --go: #1baf7a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Pretendard", "Malgun Gothic", sans-serif; color: var(--ink);
+         font-size: 10.2pt; line-height: 1.62; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .cover { height: 250mm; display: flex; flex-direction: column; justify-content: center; page-break-after: always; }
+  .cover .kicker { font-size: 11pt; color: var(--muted); letter-spacing: .08em; }
+  .cover h1 { font-size: 30pt; line-height: 1.25; margin: 6mm 0 4mm; font-weight: 800; }
+  .cover .sub { font-size: 13pt; color: var(--sec); }
+  .cover .bar { height: 4px; width: 60mm; margin: 10mm 0; background: linear-gradient(90deg, var(--an) 0 33%, var(--oa) 33% 66%, var(--go) 66%); border-radius: 2px; }
+  .cover dl { display: grid; grid-template-columns: 30mm 1fr; gap: 2mm 4mm; font-size: 10pt; color: var(--sec); margin: 0; }
+  .cover dt { color: var(--muted); }
+  .cover dd { margin: 0; }
+  h2 { font-size: 16pt; margin: 0 0 3mm; padding-bottom: 2mm; border-bottom: 2px solid var(--ink); page-break-after: avoid; }
+  h2 .no { color: var(--an); margin-right: 3mm; }
+  h3 { font-size: 12pt; margin: 6mm 0 2mm; page-break-after: avoid; }
+  section { page-break-before: always; }
+  p { margin: 0 0 2.4mm; }
+  ul { margin: 0 0 3mm; padding-left: 5mm; }
+  li { margin: 0 0 1mm; }
+  figure { margin: 3mm 0 5mm; page-break-inside: avoid; }
+  figure img { width: 100%; display: block; border: 1px solid var(--line); border-radius: 3px; }
+  figcaption { font-size: 8.8pt; color: var(--muted); margin-top: 1.5mm; }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 9.2pt; page-break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: 1.6mm 2.2mm; text-align: left; vertical-align: top; }
+  th { background: var(--tint); font-weight: 700; }
+  td.n, th.n { text-align: right; white-space: nowrap; }
+  code { font-family: Consolas, "D2Coding", monospace; font-size: 8.8pt; background: var(--tint); padding: 0 1mm; border-radius: 2px; }
+  .box { background: var(--tint); border-left: 3px solid var(--an); padding: 2.5mm 4mm; margin: 3mm 0 4mm; font-size: 9.6pt; page-break-inside: avoid; }
+  .box.warn { border-left-color: #d99a1e; }
+  .box b { display: block; margin-bottom: 1mm; }
+  .meta { display: grid; grid-template-columns: 22mm 1fr; gap: 1mm 3mm; font-size: 9.2pt; margin: 2mm 0 4mm; }
+  .meta dt { color: var(--muted); } .meta dd { margin: 0; }
+  .toc { counter-reset: none; list-style: none; padding: 0; font-size: 10.5pt; }
+  .toc li { display: flex; gap: 3mm; padding: 1.6mm 0; border-bottom: 1px dotted var(--line); }
+  .toc .no { color: var(--an); font-weight: 700; width: 8mm; }
+  .A { color: #1d5fae; font-weight: 700; } .O { color: #c4501f; font-weight: 700; } .G { color: #128a5f; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="kicker">2026 KIST AIX 성과 공유회 · 기술 문서</div>
+  <h1>키스토(KISTO)<br />바탕화면의 AI 연구 동료</h1>
+  <div class="sub">멀티에이전트 연구 파이프라인과 이종 모델 교차검증의 설계·구현</div>
+  <div class="bar"></div>
+  <dl>
+    <dt>문서 범위</dt><dd>시스템 구조, 핵심 알고리즘 6종, 실측 결과, 보안, 한계</dd>
+    <dt>기준 버전</dt><dd>2026-09-23 (저장소 main 브랜치)</dd>
+    <dt>저장소</dt><dd>github.com/kihowork94-korea/kisto</dd>
+    <dt>시연 데이터</dt><dd>분석 단계의 수치는 시연용 가상 데이터로 계산한 값이다 (실측 연구값 아님)</dd>
+  </dl>
+</div>
+
+<section style="page-break-before: auto">
+  <h2>목차</h2>
+  <ol class="toc">
+    <li><span class="no">1</span>개요 — 문제 정의와 설계 원칙</li>
+    <li><span class="no">2</span>시스템 구조 — '나만의 연구실'</li>
+    <li><span class="no">3</span>알고리즘 1 · 의도 라우팅과 상태 기반 모듈 선택</li>
+    <li><span class="no">4</span>알고리즘 2 · 이종 모델 교차검증 배정과 자동 대체</li>
+    <li><span class="no">5</span>알고리즘 3 · 근거 고정 인용 (Grounded Citation)</li>
+    <li><span class="no">6</span>알고리즘 4 · 자가 수정 분석 루프</li>
+    <li><span class="no">7</span>알고리즘 5 · 대필하지 않는 집필 프로토콜</li>
+    <li><span class="no">8</span>알고리즘 6 · 연구 메모리와 실데이터 기반 게임화</li>
+    <li><span class="no">9</span>실측 결과</li>
+    <li><span class="no">10</span>보안·개인정보, 한계와 향후 과제</li>
+  </ol>
+
+  <h2 style="margin-top:10mm"><span class="no">1</span>개요</h2>
+  <h3>1.1 문제 정의</h3>
+  <p>도메인 경험이 부족한 신입 연구자는 선행 연구 파악·가설 설정·분석 해석·논문 서론 작성에서 오래 막힌다.
+    범용 AI 챗은 도움이 되지만 다음 네 가지가 남는다.</p>
+  <ul>
+    <li><b>맥락 단절</b> — 질문마다 창이 나뉘어 주제 → 가설 → 분석 → 논문으로 이어지는 맥락이 끊긴다.</li>
+    <li><b>자기 검증의 편향</b> — 답을 만든 모델이 스스로 검증하면 같은 편향을 공유한다.</li>
+    <li><b>인용 환각</b> — 존재하지 않는 논문을 그럴듯하게 인용한다.</li>
+    <li><b>대필 위험</b> — 연구자의 해석 없이 완성된 글을 내놓아 연구윤리·학습 효과를 해친다.</li>
+  </ul>
+  <h3>1.2 설계 원칙</h3>
+  <table>
+    <tr><th style="width:30%">원칙</th><th>구현</th></tr>
+    <tr><td>하나의 창구, 여러 전문가</td><td>연구자는 캐릭터 '키스토' 한 명과 대화한다. 뒤에서는 역할별 연구원 모듈이 일하고, 페르소나 레이어가 모든 답변을 한 사람의 말투로 통일한다.</td></tr>
+    <tr><td>다른 회사 모델의 검토</td><td>결과를 실제로 만든 모델과 회사가 다른 모델을 검토위원 1순위로 코드가 강제 배정한다 (알고리즘 2).</td></tr>
+    <tr><td>근거는 코드가 보증</td><td>참고문헌 목록은 LLM이 쓰지 않고, 실제 검색 결과로 코드가 만든다 (알고리즘 3).</td></tr>
+    <tr><td>해석은 연구자의 몫</td><td>초안 요청에 먼저 연구자의 해석을 묻고, 그 해석이 저장된 뒤에만 초안을 쓴다 (알고리즘 5).</td></tr>
+    <tr><td>보이는 진척은 실데이터로</td><td>로드맵·연구실·대시보드의 모든 수치는 저장된 기록에서 계산한다 (알고리즘 6).</td></tr>
+    <tr><td>패턴 차용, 연동 주장 없음</td><td>Google AI Co-Scientist, FutureHouse Kosmos의 멀티에이전트 <i>패턴</i>을 참고해 자체 재구현했다. 두 서비스는 공개 API가 없으며 연동하지 않았다.</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2><span class="no">2</span>시스템 구조</h2>
+  <p>로컬 PC에서 FastAPI 백엔드와 Electron 위젯이 함께 실행된다. 연구자의 메시지는 개인정보 가림 → 의도 라우터 →
+    연구 맥락 주입 → 연구원 모듈을 거친 뒤, <b>페르소나 다듬기와 교차검증을 병렬로</b> 받아 한 번에 응답된다.
+    모든 결과는 주제별 스레드에 기록되고, 그 기록에서 로드맵·연구실·대시보드가 계산된다.</p>
+  <figure style="margin:2mm 4% 3mm"><img src="images/diagram_arch.png" /><figcaption>그림 1. 전체 시스템 구성도</figcaption></figure>
+  <table>
+    <tr><th style="width:18%">구성원</th><th style="width:13%">자리</th><th style="width:14%">기본 모델</th><th>하는 일</th><th style="width:24%">구현</th></tr>
+    <tr><td>연구실 매니저</td><td>위젯</td><td class="A">Claude</td><td>의도 분류, 말투 통일</td><td><code>orchestrator/router.py</code>, <code>persona.py</code></td></tr>
+    <tr><td>문헌 연구원</td><td>서재</td><td class="A">Claude</td><td>실제 논문 검색, 선행 연구 요약, 후보 가설 비교</td><td><code>modules/research_coach.py</code>, <code>literature.py</code></td></tr>
+    <tr><td>분석 연구원</td><td>실험대</td><td class="O">GPT</td><td>분석 코드 작성 → 격리 실행 → 자동 수정</td><td><code>modules/analysis_partner.py</code>, <code>sandbox/</code></td></tr>
+    <tr><td>집필 연구원</td><td>노트북</td><td class="A">Claude</td><td>해석 질문 → 해석을 반영한 초안</td><td><code>modules/writing_coach.py</code></td></tr>
+    <tr><td>외부 검토위원</td><td>검토 보드</td><td>다른 회사</td><td>과잉해석·통계 오류·인용 불일치 지적</td><td><code>modules/verifier.py</code>, <code>config.py</code></td></tr>
+  </table>
+  <p>역할별 모델은 연구실 화면의 '연구원 명단'에서 연구 책임자가 바꿀 수 있고(<code>GET/PUT /lab/roles</code>),
+    키가 없는 모델은 자동으로 다른 모델이 대신한다. 모델 어댑터는 Claude API, Claude Code(정액 구독), OpenAI, Gemini 4종이다.</p>
+</section>
+
+<section>
+  <h2><span class="no">3</span>알고리즘 1 · 의도 라우팅과 상태 기반 모듈 선택</h2>
+  <dl class="meta"><dt>구현</dt><dd><code>backend/orchestrator/router.py</code> · <code>backend/main.py</code></dd></dl>
+  <p><b>문제.</b> "이걸로 분석해 줘", "논문에 녹여 줘"처럼 연구 대화의 상당수는 앞선 맥락이 있어야 의미가 정해진다.
+    LLM에게 모듈 선택까지 맡기면 파이프라인 단계를 건너뛰거나 되돌아가는 오류가 생긴다.</p>
+  <p><b>방법.</b> LLM은 5개 의도 중 하나와 (필요하면) 새 주제 이름·영어 검색어만 JSON으로 분류한다. 어느 연구원에게
+    보낼지는 <b>스레드에 저장된 연구 상태</b>에 대한 규칙이 결정한다. JSON 해석에 실패하면 가장 안전한 <code>topic_explore</code>로 처리한다.</p>
+  <figure><img src="images/diagram_route.png" /><figcaption>그림 2. 의도 분류와 상태 규칙, 요청 1건의 처리 순서</figcaption></figure>
+  <div class="box"><b>확인한 효과</b>
+    테스트 중 "분석 이후 이어서" 요청이 문헌 연구원으로 되돌아가던 문제를 상태 규칙 3번으로 해결했다.
+    페르소나와 교차검증은 서로 독립이라 병렬로 실행해, 주제 탐색 응답을 107~145초에서 78초로 줄였다 (Claude Code 단독 구성 측정).</div>
+</section>
+
+<section>
+  <h2><span class="no">4</span>알고리즘 2 · 이종 모델 교차검증 배정과 자동 대체</h2>
+  <dl class="meta"><dt>구현</dt><dd><code>backend/config.py</code> (<code>get_verifier_adapter</code>, <code>FallbackAdapter</code>) · <code>backend/modules/verifier.py</code></dd></dl>
+  <p><b>문제.</b> 같은 모델이 자기 결과를 검증하면 같은 편향을 공유한다. Google AI Co-Scientist도 같은 모델 계열(Gemini) 안에서
+    생성과 검증을 한다. 또 외부 API는 실제로 자주 막힌다 — 9월 21일 첫 실행에서 요청 폭주(503)와 모델 없음(404)을 겪었다.</p>
+  <p><b>방법.</b> 결과를 <b>실제로 만든</b> 모델 p*의 회사를 기준으로 후보를 세 층으로 정렬한다: 다른 회사 → 같은 회사 다른 모델 →
+    자기 검토. Claude API와 Claude Code는 같은 회사로 본다. 각 후보는 공통 Fallback 절차로 호출되며, 일시적 오류는 4초·10초 대기 후
+    재시도하고 그 밖의 오류는 다음 후보로 넘어간다. <b>검토를 건너뛰지는 않으며</b>, 어느 층에서 검토했는지 기록에 남긴다.</p>
+  <figure><img src="images/diagram_verify.png" /><figcaption>그림 3. 검토위원 후보 순서, Fallback 실행, 실제 실행 기록</figcaption></figure>
+  <div class="box"><b>왜 '실제로 답한 모델'을 기록하는가</b>
+    폴백이 일어나면 예정된 모델과 실제로 답한 모델이 달라진다. 예정 기준으로 기록하면 교차검증 비율이 사실과 어긋난다.
+    그래서 호출이 성공한 순간의 모델을 추적(<code>tracing.note_answer</code>)해 생성자·검토자 판정의 근거로 쓴다.</div>
+</section>
+
+<section>
+  <h2><span class="no">5</span>알고리즘 3 · 근거 고정 인용</h2>
+  <dl class="meta"><dt>구현</dt><dd><code>backend/literature.py</code> · <code>modules/research_coach.py</code> · <code>modules/writing_coach.py</code> · <code>memory/store.py</code> (<code>add_references</code>)</dd></dl>
+  <p><b>문제.</b> LLM은 존재하지 않는 논문을 그럴듯한 서지 형식으로 만들어 낸다. 프롬프트로 "지어내지 마라"라고만 하면 막을 수 없다.</p>
+  <p><b>방법.</b> 생성 영역과 결정 영역을 분리한다. 라우터가 뽑은 영어 검색어로 PubMed(생의학 우선)와 OpenAlex(전 분야 보완)를
+    검색해 DOI·제목 기준으로 중복을 없애고 최대 6편을 고른다. 논문에는 스레드 전체에서 유지되는 번호 [n]을 붙인다.
+    LLM은 이 번호로만 인용할 수 있고, 참고문헌 목록은 본문에서 실제로 쓰인 번호만 골라 <b>코드가</b> 검색된 서지 그대로 붙인다.
+    검토위원은 인용 문장과 해당 초록을 대조한다.</p>
+  <figure><img src="images/diagram_cite.png" /><figcaption>그림 4. 외부 DB · 코드 · LLM · 검토 4개 영역으로 나눈 인용 파이프라인</figcaption></figure>
+  <div class="box"><b>확인한 동작 (2026-09-21)</b>
+    PubMed에서 실제 논문 6편을 찾아 [번호]로 인용했고, 근거 논문이 없는 문장("미숙아 피부 손상")에는 인용을 지어내지 않고
+    <code>[참고문헌 필요]</code>로 남겼다. 검토위원(GPT)은 인용 [6]이 해당 문장의 근거로 맞지 않을 가능성을 지적했다.</div>
+</section>
+
+<section>
+  <h2><span class="no">6</span>알고리즘 4 · 자가 수정 분석 루프</h2>
+  <dl class="meta"><dt>구현</dt><dd><code>backend/modules/analysis_partner.py</code> · <code>backend/sandbox/executor.py</code></dd></dl>
+  <p><b>문제.</b> 생성된 분석 코드는 한 번에 돌지 않는 경우가 많고, 수치만으로는 연구 질문에 대한 답이 되지 않는다.</p>
+  <p><b>방법.</b> 코딩에 강한 모델(GPT)이 코드를 쓰고, 임시 폴더에서 첨부 파일의 복사본만으로 격리 실행한다. 실패하면 코드와
+    에러 메시지를 넘겨 최대 2회 스스로 고친다. 해석은 문헌 연구원과 같은 모델이 <b>원래 요청 + 연구 맥락(가설) + 코드 + 출력</b>을
+    함께 보고 가설을 지지하는지 반박하는지 판단한다. 결과는 스레드에 기록되고 다른 회사 모델의 검토를 받는다.</p>
+  <figure><img src="images/diagram_analysis.png" /><figcaption>그림 5. 코드 생성 → 격리 실행 → 오류 기반 수정 → 맥락 해석 → 기록·검증</figcaption></figure>
+  <div class="box"><b>확인한 효과</b>
+    가상 데이터(n=12)에서 MAE·상관계수·Bland-Altman을 계산하고 가설과 연결해 해석했다. 검토위원(Claude)은 GPT가 만든 해석에서
+    "피어슨 r은 일치도가 아니라 연관성 지표"라는 통계적 과대해석을 지적했다.</div>
+</section>
+
+<section>
+  <h2><span class="no">7</span>알고리즘 5 · 대필하지 않는 집필 프로토콜</h2>
+  <dl class="meta"><dt>구현</dt><dd><code>backend/modules/writing_coach.py</code> · <code>backend/main.py</code></dd></dl>
+  <p><b>문제.</b> "초안 써 줘"에 곧바로 완성된 글을 주면 연구자는 자기 결과를 해석하는 연습을 건너뛰게 되고, 연구윤리상 대필이 된다.</p>
+  <p><b>방법.</b> 2단계 상태 기계로 구현했다. 첫 요청(S0 → S1)에는 분석 핵심만 짚고 해석을 묻는 질문 2개 이내로 답한다.
+    연구자의 답(S1 → S2)이 오면 그것을 반드시 반영해 초안을 쓰고, 해석은 스레드에 저장되어 이후 모든 모듈의 맥락과 연구노트에 들어간다.
+    해석 질문은 페르소나를 거치지 않는다 — 말투를 다듬는 단계가 질문에 스스로 답해 버리는 현상을 실제로 겪었기 때문이다.
+    초안 역시 말투 변환 없이 원문 그대로 전달한다.</p>
+  <figure><img src="images/diagram_writing.png" /><figcaption>그림 6. 해석 대기 상태를 거쳐야만 초안이 만들어지는 상태 기계</figcaption></figure>
+  <div class="box"><b>확인한 동작</b>
+    데모 3단계에서 집필 연구원은 초안을 쓰지 않고 해석을 먼저 물었고(12초), 4단계 초안은 연구자가 답한
+    "보조 수단으로서 가능성, 다만 n=12·통제 환경 한계" 해석을 반영했다.</div>
+</section>
+
+<section>
+  <h2><span class="no">8</span>알고리즘 6 · 연구 메모리와 실데이터 기반 게임화</h2>
+  <dl class="meta"><dt>구현</dt><dd><code>backend/memory/store.py</code> (<code>thread_brief</code>, <code>thread_progress</code>) · <code>backend/lab.py</code> · <code>widget/lab.js</code></dd></dl>
+  <p><b>문제.</b> 게임 요소가 실제 진척과 무관하게 움직이면 장식에 그치고 신뢰를 잃는다. 또 모듈마다 현재 메시지만 받으면
+    앞선 연구를 잊는다.</p>
+  <p><b>방법.</b> 주제 하나를 스레드 하나로 저장하고, 그 요약본(<code>thread_brief</code>)을 모든 모듈에 주입한다. 기록이 없을 때는
+    맥락을 넘기지 않는다 — 빈 맥락을 주면 모델이 "지난번에 말씀드린 것처럼"이라며 없는 대화를 지어낸다.
+    로드맵 5단계는 저장된 필드에 대한 술어로 판정하고, 연구실의 책·시험관·메모지, 레벨, 대시보드 지표도 같은 기록에서 계산한다.</p>
+  <figure><img src="images/diagram_memory.png" /><figcaption>그림 7. 스레드 스키마 → 단계 판정 술어 → 연구실·레벨·대시보드</figcaption></figure>
+  <p>로드맵 5단계(주제 잡기 → 가설 → 분석 → 교차검증 → 초안)는 AutoResearch 5단계 프레임워크에 대응한다.
+    "주제별 대화 폴더" 대신 진행 단계를 보여주는 방식을 택해 Claude·ChatGPT Projects와 구별된다.</p>
+</section>
+
+<section>
+  <h2><span class="no">9</span>실측 결과</h2>
+  <p>2026-09-21 <code>scripts/e2e.py</code>로 데모 시나리오(신생아 카메라 비접촉 심박 측정 vs 심전도 일치도)를 Anthropic·OpenAI·Google
+    3사 모델을 동시에 연동해 실행한 기록이다. 시간은 키스토 시스템의 동작을 잰 것이며, 분석 수치는 가상 데이터로 계산했다.</p>
+  <h3>9.1 단계별 결과</h3>
+  <table>
+    <tr><th>단계</th><th>만든 모델</th><th>검토 모델</th><th>이종 검증</th><th class="n">소요</th></tr>
+    <tr><td>① 주제 탐색 (실제 논문 6편 검색)</td><td class="A">Claude</td><td class="G">Gemini</td><td>O</td><td class="n">82초</td></tr>
+    <tr><td>② 데이터 분석 (코드 작성·실행·해석)</td><td class="O">GPT</td><td class="A">Claude</td><td>O</td><td class="n">90초</td></tr>
+    <tr><td>③ 해석 질문 (대필 금지)</td><td class="A">Claude</td><td>— (검토할 결과 없음)</td><td>–</td><td class="n">12초</td></tr>
+    <tr><td>④ 서론 초안 (연구자 해석 반영)</td><td class="A">Claude</td><td class="O">GPT</td><td>O</td><td class="n">107초</td></tr>
+    <tr><th>합계</th><th colspan="2">3사 모두 참여</th><th>3 / 3</th><th class="n">292초</th></tr>
+  </table>
+  <p>같은 시나리오의 소요 시간은 435초(순차 실행) → 297초(검토·말투 병렬화) → 292초(3사 구성)로 줄었다.</p>
+  <h3>9.2 검토위원이 잡아낸 오류</h3>
+  <table>
+    <tr><th style="width:26%">검토</th><th>지적 내용</th></tr>
+    <tr><td><span class="A">Claude</span> → <span class="G">Gemini</span></td><td>근거 논문의 NIRS(접촉식)를 비접촉 기술로 잘못 설명, 초록에 이미 있는 기법을 연구 공백처럼 서술</td></tr>
+    <tr><td><span class="O">GPT</span> → <span class="A">Claude</span></td><td>피어슨 r은 일치도가 아니라 연관성 지표 — r=0.95로 측정 일치를 주장하는 과대해석, 편향의 신뢰구간 누락</td></tr>
+    <tr><td><span class="A">Claude</span> → <span class="O">GPT</span></td><td>①의 NIRS 오류가 초안에 남아 있음을 다시 지적, 인용 [6]이 해당 문장의 근거로 맞지 않을 가능성</td></tr>
+  </table>
+  <h3>9.3 오류 탐지 평가와 비용 구조</h3>
+  <ul>
+    <li>통계·해석 오류를 심어 둔 결과 10건(상관≠일치, 다중비교 미보정, 인과 오해석, 초록에 없는 인용 등)과 정상 결과 2건으로
+      검토위원을 평가한 결과 <b>10건 모두 탐지, 오탐 0건</b> (<code>scripts/verifier_eval.py</code>).</li>
+    <li>데모 1회 기준 모델 호출의 80%, 생성 토큰의 84%를 정액 구독·무료 등급 구간에서 처리했다. 종량 과금은 분석(GPT) 구간만 발생한다.</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="no">10</span>보안·개인정보, 한계와 향후 과제</h2>
+  <h3>10.1 보안·개인정보</h3>
+  <ul>
+    <li><b>개인정보 자동 가림</b> — 메시지와 첨부 파일에서 주민등록번호·전화번호·이메일을 외부 모델로 보내기 전에 가린다 (<code>privacy.py</code>).
+      영유아 연구처럼 민감한 데이터에서 실수로 붙여 넣은 식별정보가 나가지 않게 하는 최소한의 장치다.</li>
+    <li><b>로컬 서버 보호</b> — 접근 토큰, Origin 허용 목록, Host 검사로 다른 웹사이트가 로컬 백엔드를 호출해 기록을 읽거나
+      분석 코드 실행을 유도하는 경로를 막았다.</li>
+    <li><b>실행 격리</b> — 생성 코드는 임시 폴더에서 파일 복사본만으로 실행하고, 시간 제한과 패키지 설치 차단을 둔다.</li>
+    <li><b>키 관리</b> — API 키는 <code>.env</code>에만 두고 저장소에 넣지 않는다.</li>
+  </ul>
+  <h3>10.2 한계</h3>
+  <div class="box warn"><b>있는 그대로 적는 한계</b>
+    <ul style="margin:0">
+      <li>실행 격리는 프로토타입 수준(하위 프로세스 + 임시 폴더)이다. 여러 사용자에게 배포하려면 컨테이너 격리가 필요하다.</li>
+      <li>오류 탐지 평가(10/10)는 Claude 단독으로 측정했고, 사례가 쉬워 천장 효과가 있다. 회사별 차이를 보려면 교란 변수·단위 착오·자유도 오류 같은
+        더 미묘한 사례가 필요하다.</li>
+      <li>검토 노트는 자동 수정이 아니라 연구 책임자에게 보이는 노트다. 그래서 앞 단계의 지적(NIRS)이 초안까지 이어진 사례가 있다 —
+        최종 판단을 연구자에게 두는 설계의 결과이며, 이전 검토 지적을 다음 단계에 넘기는 것이 개선 후보다.</li>
+      <li>분석 결과 수치는 시연용 가상 데이터로 계산한 값이다.</li>
+    </ul>
+  </div>
+  <h3>10.3 향후 과제</h3>
+  <ul>
+    <li>이전 검토 지적을 다음 단계(초안)의 입력으로 전달</li>
+    <li>보안 요구가 높은 과제를 위해 특정 역할만 사내·로컬 모델로 교체</li>
+    <li>어려운 오류 사례를 추가해 회사별 검토 성능 비교</li>
+  </ul>
+  <h3>10.4 참고한 선례</h3>
+  <ul>
+    <li>Google AI Co-Scientist (2025) — 생성·토론·진화 에이전트 기반 가설 생성</li>
+    <li>FutureHouse Kosmos — 장기 자율 연구 에이전트</li>
+    <li>Sakana AI Scientist v1/v2 — 아이디어 → 실험 → 논문 → 리뷰 자동화</li>
+    <li>AutoResearch 5단계 프레임워크 — 로드맵 5단계의 근거</li>
+  </ul>
+</section>
+
+</body>
+</html>
